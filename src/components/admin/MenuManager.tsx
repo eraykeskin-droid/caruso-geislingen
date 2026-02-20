@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -34,24 +34,9 @@ interface Category {
 }
 
 const MenuManager = () => {
-    const [categories, setCategories] = useState<Category[]>([
-        {
-            id: 'cat-1',
-            name: 'Cocktails',
-            is_special: true,
-            bg_color: '#ffe08a',
-            items: [
-                { id: 'item-1', name: 'Sex on the Beach', price: 9.5, unit: '0,4l', info: 'Wodka, Pfirsich...' }
-            ]
-        },
-        {
-            id: 'cat-2',
-            name: 'Softdrinks',
-            is_special: false,
-            bg_color: '#000000',
-            items: []
-        }
-    ]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
 
     const [modal, setModal] = useState<{
         type: 'category' | 'item';
@@ -59,6 +44,39 @@ const MenuManager = () => {
         data: any;
         parentId?: string;
     } | null>(null);
+
+    useEffect(() => {
+        fetchMenu();
+    }, []);
+
+    const fetchMenu = async () => {
+        try {
+            const res = await fetch('/api/get-menu.php');
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setCategories(data);
+            }
+        } catch (err) {
+            console.error('Error fetching menu:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const persistMenu = async (updatedCategories: Category[]) => {
+        setSaving(true);
+        try {
+            await fetch('/api/save-menu.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedCategories)
+            });
+        } catch (err) {
+            console.error('Error saving menu:', err);
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -74,11 +92,11 @@ const MenuManager = () => {
     const handleDragEnd = (event: any) => {
         const { active, over } = event;
         if (active && over && active.id !== over.id) {
-            setCategories((items) => {
-                const oldIndex = items.findIndex((i) => i.id === active.id);
-                const newIndex = items.findIndex((i) => i.id === over.id);
-                return arrayMove(items, oldIndex, newIndex);
-            });
+            const oldIndex = categories.findIndex((i) => i.id === active.id);
+            const newIndex = categories.findIndex((i) => i.id === over.id);
+            const newCategories = arrayMove(categories, oldIndex, newIndex);
+            setCategories(newCategories);
+            persistMenu(newCategories);
         }
     };
 
@@ -86,6 +104,7 @@ const MenuManager = () => {
         if (!modal) return;
 
         const { type, mode, data, parentId } = modal;
+        let newCategories = [...categories];
 
         if (type === 'category') {
             if (mode === 'add') {
@@ -94,9 +113,9 @@ const MenuManager = () => {
                     id: `cat-${Date.now()}`,
                     items: []
                 };
-                setCategories([...categories, newCat]);
+                newCategories = [...newCategories, newCat];
             } else {
-                setCategories(categories.map(c => c.id === data.id ? { ...c, ...data } : c));
+                newCategories = newCategories.map(c => c.id === data.id ? { ...c, ...data } : c);
             }
         } else if (type === 'item' && parentId) {
             if (mode === 'add') {
@@ -104,36 +123,51 @@ const MenuManager = () => {
                     ...data,
                     id: `item-${Date.now()}`
                 };
-                setCategories(categories.map(c =>
+                newCategories = newCategories.map(c =>
                     c.id === parentId ? { ...c, items: [...c.items, newItem] } : c
-                ));
+                );
             } else {
-                setCategories(categories.map(c =>
+                newCategories = newCategories.map(c =>
                     c.id === parentId
                         ? { ...c, items: c.items.map(i => i.id === data.id ? { ...i, ...data } : i) }
                         : c
-                ));
+                );
             }
         }
+        setCategories(newCategories);
+        persistMenu(newCategories);
         setModal(null);
     };
 
     const deleteCategory = (id: string) => {
         if (confirm('Kategorie wirklich löschen?')) {
-            setCategories(categories.filter(c => c.id !== id));
+            const newCategories = categories.filter(c => c.id !== id);
+            setCategories(newCategories);
+            persistMenu(newCategories);
         }
     };
 
     const deleteItem = (catId: string, itemId: string) => {
         if (confirm('Artikel wirklich löschen?')) {
-            setCategories(categories.map(c =>
+            const newCategories = categories.map(c =>
                 c.id === catId ? { ...c, items: c.items.filter(i => i.id !== itemId) } : c
-            ));
+            );
+            setCategories(newCategories);
+            persistMenu(newCategories);
         }
     };
 
+    if (loading) return <div className="p-8 text-center text-gray-500 animate-pulse uppercase tracking-widest text-xs">Lade Menü...</div>;
+
     return (
-        <div className="p-6">
+        <div className="p-6 relative">
+            {saving && (
+                <div className="fixed top-20 right-8 z-50 flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg animate-fade-in">
+                    <div className="w-2 h-2 bg-black rounded-full animate-ping"></div>
+                    Speichern...
+                </div>
+            )}
+
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-xl font-bold text-white uppercase tracking-widest italic border-l-4 border-secondary pl-4">Menü-Verwaltung</h2>
                 <button
