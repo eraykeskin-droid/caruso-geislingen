@@ -76,40 +76,8 @@ const MenuManager = () => {
             if (cached) {
                 setCategories(JSON.parse(cached));
             } else {
-                // Initial Data extracted from caruso-geislingen.de
-                const defaultData = [
-                    {
-                        id: 'cat-wint',
-                        name: 'Winterkarte: Specials',
-                        is_special: true,
-                        bg_color: '#ffe08a',
-                        items: [
-                            { id: 'item-w1', name: 'Winter Mojito', price: 6.9, unit: '0,4l', info: 'Limetten, Rohrzucker, Minze, Säfte' },
-                            { id: 'item-w2', name: 'Orange Cinnamon Fizz', price: 5.9, unit: '0,4l', info: 'Orangen, Zimt, Soda' }
-                        ]
-                    },
-                    {
-                        id: 'cat-beer',
-                        name: 'Biere',
-                        is_special: false,
-                        bg_color: '#000000',
-                        items: [
-                            { id: 'item-b1', name: 'Halbe', price: 3.9, unit: '0,5l', info: 'Frisch vom Fass' },
-                            { id: 'item-b2', name: 'Hefeweizen', price: 3.9, unit: '0,5l', info: '' }
-                        ]
-                    },
-                    {
-                        id: 'cat-cock',
-                        name: 'Cocktails',
-                        is_special: true,
-                        bg_color: '#ffe08a',
-                        items: [
-                            { id: 'item-c1', name: 'Caipirinha', price: 7.9, unit: '0,4l', info: 'Pitu, Rohrzucker, Limette' },
-                            { id: 'item-c2', name: 'Sex on the Beach', price: 7.9, unit: '0,4l', info: 'Wodka, Pfirsichlikör, Säfte' }
-                        ]
-                    }
-                ];
-                setCategories(defaultData);
+                // Initial Data
+                setCategories([]);
             }
         } catch (err) {
             console.error('Error fetching menu, using cache:', err);
@@ -126,12 +94,11 @@ const MenuManager = () => {
         localStorage.setItem('caruso_menu_cache', JSON.stringify(updatedCategories));
 
         try {
-            const res = await fetch('/api/save-menu.php', {
+            await fetch('/api/save-menu.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedCategories)
             });
-            // If it's a PHP source or fails, we still have localStorage
         } catch (err) {
             console.warn('API Save failed (expected in local dev), saved to LocalStorage.');
         } finally {
@@ -140,14 +107,8 @@ const MenuManager = () => {
     };
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 8,
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
     const handleDragEnd = (event: any) => {
@@ -163,35 +124,23 @@ const MenuManager = () => {
 
     const handleSave = () => {
         if (!modal) return;
-
         const { type, mode, data, parentId } = modal;
         let newCategories = [...categories];
 
         if (type === 'category') {
             if (mode === 'add') {
-                const newCat: Category = {
-                    ...data,
-                    id: `cat-${Date.now()}`,
-                    items: []
-                };
+                const newCat: Category = { ...data, id: `cat-${Date.now()}`, items: [] };
                 newCategories = [...newCategories, newCat];
             } else {
                 newCategories = newCategories.map(c => c.id === data.id ? { ...c, ...data } : c);
             }
         } else if (type === 'item' && parentId) {
             if (mode === 'add') {
-                const newItem: MenuItem = {
-                    ...data,
-                    id: `item-${Date.now()}`
-                };
-                newCategories = newCategories.map(c =>
-                    c.id === parentId ? { ...c, items: [...c.items, newItem] } : c
-                );
+                const newItem: MenuItem = { ...data, id: `item-${Date.now()}` };
+                newCategories = newCategories.map(c => c.id === parentId ? { ...c, items: [...c.items, newItem] } : c);
             } else {
                 newCategories = newCategories.map(c =>
-                    c.id === parentId
-                        ? { ...c, items: c.items.map(i => i.id === data.id ? { ...i, ...data } : i) }
-                        : c
+                    c.id === parentId ? { ...c, items: c.items.map(i => i.id === data.id ? { ...i, ...data } : i) } : c
                 );
             }
         }
@@ -224,7 +173,7 @@ const MenuManager = () => {
         <div className="p-6 relative">
             {saving && (
                 <div className="fixed top-20 right-8 z-50 flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg animate-fade-in border border-black/10">
-                    <div className="w-2 h-2 bg-black rounded-full animate-ping"></div>
+                    <div className="w-2 h-2 bg-black rounded-full animate-ping text-[8px]"></div>
                     Speichern...
                 </div>
             )}
@@ -239,15 +188,8 @@ const MenuManager = () => {
                 </button>
             </div>
 
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-            >
-                <SortableContext
-                    items={categories.map(c => c.id)}
-                    strategy={verticalListSortingStrategy}
-                >
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={categories.map(c => c.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-6">
                         {categories.map((category) => (
                             <SortableCategory
@@ -264,7 +206,6 @@ const MenuManager = () => {
                 </SortableContext>
             </DndContext>
 
-            {/* Modal */}
             {modal && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
                     <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-8 shadow-2xl">
@@ -290,7 +231,7 @@ const MenuManager = () => {
                                         />
                                     </div>
                                     <div className="flex items-center gap-4 py-2">
-                                        <label className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Highlight / Special?</label>
+                                        <label className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Hervorgehoben / Spezial?</label>
                                         <input
                                             type="checkbox"
                                             checked={modal.data.is_special}
@@ -378,45 +319,34 @@ const SortableCategory = ({
 }: {
     category: Category, onEdit: () => void, onDelete: () => void, onAddItem: () => void, onEditItem: (i: MenuItem) => void, onDeleteItem: (id: string) => void
 }) => {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-    } = useSortable({ id: category.id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: category.id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
 
     return (
-        <div
-            ref={setNodeRef}
-            style={style}
-            className={`p-6 rounded-2xl border ${category.is_special ? 'bg-secondary/10 border-secondary/30 shadow-[0_0_30px_rgba(255,224,138,0.05)]' : 'bg-white/[0.03] border-white/10'}`}
-        >
+        <div ref={setNodeRef} style={style} className={`p-6 rounded-2xl border ${category.is_special ? 'bg-secondary/10 border-secondary/30 shadow-[0_0_30px_rgba(255,224,138,0.05)]' : 'bg-white/[0.03] border-white/10'}`}>
             <div className="flex items-center gap-4">
-                <button {...attributes} {...listeners} className="text-gray-600 cursor-grab active:cursor-grabbing hover:text-white transition-colors">
+                <button {...attributes} {...listeners} className="text-gray-600 cursor-grab active:cursor-grabbing hover:text-white transition-colors flex-shrink-0">
                     <GripVertical size={20} />
                 </button>
 
-                <div className="flex-grow flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <span className={`text-xl font-bold uppercase tracking-tight ${category.is_special ? 'text-secondary' : 'text-white'}`}>
-                            {category.name}
-                            <span className="ml-3 text-[9px] text-white/70 bg-white/10 px-2 py-0.5 rounded-full border border-white/10 font-mono shadow-sm">
-                                {category.items?.length || 0} items
+                <div className="flex-grow flex items-center justify-between ml-2">
+                    <div className="flex items-center gap-4">
+                        <div className={`flex items-center gap-3 ${category.is_special ? 'text-secondary' : 'text-white'}`}>
+                            <span className="text-xl font-bold uppercase tracking-tight leading-none">
+                                {category.name}
                             </span>
-                        </span>
-                        {!!category.is_special && <Star size={14} className="text-secondary fill-secondary animate-pulse" />}
+                            <span className="text-[9px] text-white/70 bg-white/10 px-2.5 py-1 rounded-full border border-white/10 font-mono shadow-sm flex items-center justify-center leading-none h-5">
+                                {category.items?.length || 0} Artikel
+                            </span>
+                            {!!category.is_special && <Star size={14} className="text-secondary fill-secondary animate-pulse" />}
+                            {!!category.is_special && <span className="text-[8px] bg-secondary text-black font-black px-1.5 py-1 rounded-sm uppercase tracking-tighter leading-none h-4 flex items-center">Spezial</span>}
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button onClick={onEdit} className="p-2 bg-white/5 rounded text-gray-500 hover:text-secondary hover:bg-secondary/10 transition-all"><Edit2 size={16} /></button>
-                        <button onClick={onDelete} className="p-2 bg-white/5 rounded text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all"><Trash2 size={16} /></button>
-                        <div className="w-8 h-8 rounded-full border-2 border-white/20 ml-4 shadow-inner" style={{ backgroundColor: category.bg_color }}></div>
+                        <button onClick={onEdit} className="p-2 bg-white/5 rounded text-gray-500 hover:text-secondary hover:bg-secondary/10 transition-all font-bold text-[10px]" title="Kategorie bearbeiten"><Edit2 size={16} /></button>
+                        <button onClick={onDelete} className="p-2 bg-white/5 rounded text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all font-bold text-[10px]" title="Kategorie löschen"><Trash2 size={16} /></button>
+                        <div className="w-8 h-8 rounded-full border-2 border-white/20 ml-2 shadow-inner" style={{ backgroundColor: category.bg_color }}></div>
                     </div>
                 </div>
             </div>
@@ -447,7 +377,6 @@ const SortableCategory = ({
                                     <span className="text-secondary font-bold text-xs min-w-[50px] text-right">
                                         {typeof item.price === 'number' ? item.price.toFixed(2) : parseFloat(item.price).toFixed(2)}€
                                     </span>
-
                                     <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                                         <button onClick={() => onEditItem(item)} className="p-1.5 text-gray-400 hover:text-secondary hover:bg-secondary/10 rounded transition-all"><Edit2 size={12} /></button>
                                         <button onClick={() => onDeleteItem(item.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded transition-all"><Trash2 size={12} /></button>
