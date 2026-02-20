@@ -41,9 +41,16 @@ import MenuCard from "../components/MenuCard.astro";
 
         <!-- Menu Content Holder -->
         <div id="menu-container" class="py-12 px-6 max-w-4xl mx-auto">
-            <div class="flex flex-col items-center justify-center py-20 animate-pulse">
-                <div class="w-12 h-12 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"></div>
-                <p class="text-xs text-gray-500 uppercase tracking-widest">Lade Karte...</p>
+            <div
+                class="flex flex-col items-center justify-center py-20 animate-pulse"
+            >
+                <div
+                    class="w-12 h-12 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"
+                >
+                </div>
+                <p class="text-xs text-gray-500 uppercase tracking-widest">
+                    Lade Karte...
+                </p>
             </div>
         </div>
 
@@ -62,54 +69,72 @@ import MenuCard from "../components/MenuCard.astro";
 
 <script>
     async function loadMenu() {
-        const container = document.getElementById('menu-container');
+        const container = document.getElementById("menu-container");
         if (!container) return;
 
         try {
-            const res = await fetch('/api/get-menu.php');
+            const res = await fetch("/api/get-menu.php");
             const data = await res.json();
 
             if (!Array.isArray(data) || data.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500 italic py-20">Aktuell ist keine Karte verfügbar.</p>';
+                container.innerHTML =
+                    '<p class="text-center text-gray-500 italic py-20">Aktuell ist keine Karte verfügbar.</p>';
                 return;
             }
 
-            container.innerHTML = ''; // Clear loader
+            container.innerHTML = ""; // Clear loader
 
             data.forEach((category: any) => {
-                const section = document.createElement('div');
+                const section = document.createElement("div");
                 section.className = "mb-16 animate-fade-in";
-                
+
                 section.innerHTML = `
                     <div class="mb-10 flex items-center gap-6">
-                        <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-tighter italic border-l-4 pl-6" style="border-color: ${category.bg_color || '#ffe08a'}; color: ${category.is_special ? (category.bg_color || '#ffe08a') : '#fff'}">
+                        <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-tighter italic border-l-4 pl-6" style="border-color: ${
+                            category.bg_color || "#ffe08a"
+                        }; color: ${
+                    category.is_special
+                        ? category.bg_color || "#ffe08a"
+                        : "#fff"
+                }">
                             ${category.name}
                         </h2>
-                        ${category.is_special ? '<span class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest rounded-full border border-secondary/20 animate-pulse">Special</span>' : ''}
+                        ${
+                            category.is_special
+                                ? '<span class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest rounded-full border border-secondary/20 animate-pulse">Special</span>'
+                                : ""
+                        }
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                        ${category.items.map((item: any) => \`
+                        ${category.items
+                            .map(
+                                (item: any) => `
                             <div class="group">
                                 <div class="flex justify-between items-baseline mb-2">
                                     <h3 class="text-white font-bold tracking-wide uppercase text-sm group-hover:text-secondary transition-colors italic">
-                                        \${item.name}
+                                        ${item.name}
                                     </h3>
                                     <div class="flex-grow border-b border-dotted border-white/10 mx-4"></div>
-                                    <span class="text-secondary font-bold text-sm tracking-tighter">\${parseFloat(item.price).toFixed(2)}€</span>
+                                    <span class="text-secondary font-bold text-sm tracking-tighter">${parseFloat(
+                                        item.price
+                                    ).toFixed(2)}€</span>
                                 </div>
                                 <div class="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest">
-                                    <span>\${item.info || ''}</span>
-                                    <span>\${item.unit || ''}</span>
+                                    <span>${item.info || ""}</span>
+                                    <span>${item.unit || ""}</span>
                                 </div>
                             </div>
-                        \`).join('')}
+                        `
+                            )
+                            .join("")}
                     </div>
-                \`;
+                `;
                 container.appendChild(section);
             });
         } catch (err) {
-            console.error('Error:', err);
-            container.innerHTML = '<p class="text-center text-red-500/50 italic py-20 uppercase text-xs">Fehler beim Laden der Karte.</p>';
+            console.error("Error:", err);
+            container.innerHTML =
+                '<p class="text-center text-red-500/50 italic py-20 uppercase text-xs">Fehler beim Laden der Karte.</p>';
         }
     }
 
