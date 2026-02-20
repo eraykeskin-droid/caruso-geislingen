@@ -3,57 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import CategorySection from "../components/CategorySection.astro";
 import MenuCard from "../components/MenuCard.astro";
 
-// Mock data (will be replaced by MySQL fetch)
-const menuData = [
-    {
-        name: "Cocktails",
-        isSpecial: true,
-        bg_color: "#ffe08a",
-        items: [
-            {
-                name: "Sex on the Beach",
-                price: 9.5,
-                unit: "0,4l",
-                info: "Wodka, Pfirsichlikör, Orangen-, Ananas- & Cranberrysaft",
-            },
-            {
-                name: "Caipirinha",
-                price: 8.9,
-                unit: "0,4l",
-                info: "Pitu, Limetten, Rohrzucker",
-            },
-            {
-                name: "Pina Colada",
-                price: 9.5,
-                unit: "0,4l",
-                info: "Weißer Rum, Kokossirup, Sahne, Ananassaft",
-            },
-        ],
-    },
-    {
-        name: "Alkoholfreie Getränke",
-        items: [
-            {
-                name: "Cola / Fanta / Mezzo",
-                price: 4.2,
-                unit: "0,33l",
-                info: "Klassisch erfrischend",
-            },
-            {
-                name: "Mineralwasser",
-                price: 3.5,
-                unit: "0,25l",
-                info: "Spritzig oder Still",
-            },
-            {
-                name: "Apfelschorle",
-                price: 4.2,
-                unit: "0,33l",
-                info: "Naturtrüb",
-            },
-        ],
-    },
-];
+// Initial empty state, will be filled by client-side fetch for dynamic updates
 ---
 
 <Layout title="Getränkekarte">
@@ -86,43 +36,111 @@ const menuData = [
                     Getränkekarte
                 </h1>
                 <div class="w-6"></div>
-                <!-- Spacer -->
             </div>
         </header>
 
-        <!-- Menu Content -->
-        <div class="py-12 px-6 max-w-4xl mx-auto">
-            {
-                menuData.map((category) => (
-                    <CategorySection
-                        name={category.name}
-                        isSpecial={category.isSpecial}
-                        bgColor={category.bg_color}
-                    >
-                        {category.items.map((item) => (
-                            <MenuCard
-                                name={item.name}
-                                price={item.price}
-                                unit={item.unit}
-                                info={item.info}
-                            />
-                        ))}
-                    </CategorySection>
-                ))
-            }
-
-            <div class="mt-20 pb-12 text-center">
-                <p class="text-xs text-gray-600 uppercase tracking-widest mb-4">
-                    Alle Preise inkl. MwSt.
-                </p>
-                <div class="flex justify-center gap-4">
-                    <div class="h-1 w-8 bg-secondary/20"></div>
-                    <div class="h-1 w-8 bg-secondary"></div>
-                    <div class="h-1 w-8 bg-secondary/20"></div>
+        <!-- Menu Content Holder -->
+        <div id="menu-container" class="py-12 px-6 max-w-4xl mx-auto">
+            <div
+                class="flex flex-col items-center justify-center py-20 animate-pulse"
+            >
+                <div
+                    class="w-12 h-12 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"
+                >
                 </div>
+                <p class="text-xs text-gray-500 uppercase tracking-widest">
+                    Lade Karte...
+                </p>
+            </div>
+        </div>
+
+        <div class="pb-12 text-center">
+            <p class="text-xs text-gray-600 uppercase tracking-widest mb-4">
+                Alle Preise inkl. MwSt.
+            </p>
+            <div class="flex justify-center gap-4">
+                <div class="h-1 w-8 bg-secondary/20"></div>
+                <div class="h-1 w-8 bg-secondary"></div>
+                <div class="h-1 w-8 bg-secondary/20"></div>
             </div>
         </div>
     </main>
 </Layout>
+
+<script>
+    async function loadMenu() {
+        const container = document.getElementById("menu-container");
+        if (!container) return;
+
+        try {
+            const res = await fetch("/api/get-menu.php");
+            const data = await res.json();
+
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML =
+                    '<p class="text-center text-gray-500 italic py-20">Aktuell ist keine Karte verfügbar.</p>';
+                return;
+            }
+
+            container.innerHTML = ""; // Clear loader
+
+            data.forEach((category) => {
+                const section = document.createElement("div");
+                section.className = "mb-16 animate-fade-in";
+
+                // Construct inner HTML using the same structure as components
+                // Note: Since we are in client-side JS, we manually build the classes
+                section.innerHTML = `
+                    <div class="mb-10 flex items-center gap-6">
+                        <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-tighter italic border-l-4 pl-6" style="border-color: ${
+                            category.bg_color || "#ffe08a"
+                        }; color: ${
+                    category.is_special
+                        ? category.bg_color || "#ffe08a"
+                        : "#fff"
+                }">
+                            ${category.name}
+                        </h2>
+                        ${
+                            category.is_special
+                                ? '<span class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest rounded-full border border-secondary/20 animate-pulse">Special</span>'
+                                : ""
+                        }
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                        ${category.items
+                            .map(
+                                (item) => `
+                            <div class="group">
+                                <div class="flex justify-between items-baseline mb-2">
+                                    <h3 class="text-white font-bold tracking-wide uppercase text-sm group-hover:text-secondary transition-colors italic">
+                                        ${item.name}
+                                    </h3>
+                                    <div class="flex-grow border-b border-dotted border-white/10 mx-4"></div>
+                                    <span class="text-secondary font-bold text-sm tracking-tighter">${parseFloat(
+                                        item.price
+                                    ).toFixed(2)}€</span>
+                                </div>
+                                <div class="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest">
+                                    <span>${item.info || ""}</span>
+                                    <span>${item.unit || ""}</span>
+                                </div>
+                            </div>
+                        `
+                            )
+                            .join("")}
+                    </div>
+                `;
+                container.appendChild(section);
+            });
+        } catch (err) {
+            console.error("Error:", err);
+            container.innerHTML =
+                '<p class="text-center text-red-500/50 italic py-20 uppercase text-xs">Fehler beim Laden der Karte.</p>';
+        }
+    }
+
+    loadMenu();
+</script>
 
 <style></style>
