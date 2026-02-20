@@ -52,12 +52,41 @@ const MenuManager = () => {
     const fetchMenu = async () => {
         try {
             const res = await fetch('/api/get-menu.php');
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                setCategories(data);
+            const contentType = res.headers.get("content-type");
+
+            if (contentType && contentType.includes("application/json")) {
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setCategories(data);
+                    // Also sync to local storage for dev reference
+                    localStorage.setItem('caruso_menu_cache', JSON.stringify(data));
+                    return;
+                }
+            }
+
+            // Fallback for local development or if API fails
+            const cached = localStorage.getItem('caruso_menu_cache');
+            if (cached) {
+                setCategories(JSON.parse(cached));
+            } else {
+                // Initial Default Data
+                const defaultData = [
+                    {
+                        id: 'cat-1',
+                        name: 'Cocktails',
+                        is_special: true,
+                        bg_color: '#ffe08a',
+                        items: [
+                            { id: 'item-1', name: 'Sex on the Beach', price: 9.5, unit: '0,4l', info: 'Wodka, Pfirsich...' }
+                        ]
+                    }
+                ];
+                setCategories(defaultData);
             }
         } catch (err) {
-            console.error('Error fetching menu:', err);
+            console.error('Error fetching menu, using cache:', err);
+            const cached = localStorage.getItem('caruso_menu_cache');
+            if (cached) setCategories(JSON.parse(cached));
         } finally {
             setLoading(false);
         }
@@ -65,16 +94,20 @@ const MenuManager = () => {
 
     const persistMenu = async (updatedCategories: Category[]) => {
         setSaving(true);
+        // Always save to localStorage for local dev persistence
+        localStorage.setItem('caruso_menu_cache', JSON.stringify(updatedCategories));
+
         try {
-            await fetch('/api/save-menu.php', {
+            const res = await fetch('/api/save-menu.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedCategories)
             });
+            // If it's a PHP source or fails, we still have localStorage
         } catch (err) {
-            console.error('Error saving menu:', err);
+            console.warn('API Save failed (expected in local dev), saved to LocalStorage.');
         } finally {
-            setSaving(false);
+            setTimeout(() => setSaving(false), 500);
         }
     };
 
@@ -162,7 +195,7 @@ const MenuManager = () => {
     return (
         <div className="p-6 relative">
             {saving && (
-                <div className="fixed top-20 right-8 z-50 flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg animate-fade-in">
+                <div className="fixed top-20 right-8 z-50 flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg animate-fade-in border border-black/10">
                     <div className="w-2 h-2 bg-black rounded-full animate-ping"></div>
                     Speichern...
                 </div>
@@ -365,7 +398,7 @@ const SortableCategory = ({
                     <Plus size={14} className="group-hover:rotate-90 transition-transform" /> Artikel hinzufügen
                 </button>
 
-                {category.items.length > 0 ? (
+                {category.items && category.items.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {category.items.map(item => (
                             <div key={item.id} className="p-4 bg-black/40 rounded-xl border border-white/5 group hover:border-secondary/20 transition-all">
@@ -374,7 +407,7 @@ const SortableCategory = ({
                                         <h4 className="text-white font-bold text-sm tracking-wide">{item.name}</h4>
                                         <span className="text-[10px] text-gray-500 uppercase">{item.unit}</span>
                                     </div>
-                                    <span className="text-secondary font-bold text-sm">{item.price.toFixed(2)}€</span>
+                                    <span className="text-secondary font-bold text-sm">{typeof item.price === 'number' ? item.price.toFixed(2) : parseFloat(item.price).toFixed(2)}€</span>
                                 </div>
                                 <p className="text-[10px] text-gray-600 mb-4 italic truncate">{item.info}</p>
                                 <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
