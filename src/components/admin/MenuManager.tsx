@@ -424,7 +424,7 @@ const SortableCategory = ({
             <div className="mt-6 ml-12 border-l-2 border-white/5 pl-8 space-y-4">
                 <button
                     onClick={onAddItem}
-                    className="text-[10px] uppercase font-bold text-gray-500 hover:text-secondary transition-colors flex items-center gap-2 mb-6 group"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-secondary/5 border border-secondary/20 text-[10px] uppercase font-bold text-secondary/70 hover:text-secondary hover:bg-secondary/10 hover:border-secondary/40 transition-all rounded-md group mt-2 mb-6"
                 >
                     <Plus size={14} className="group-hover:rotate-90 transition-transform" /> Artikel hinzufügen
                 </button>
