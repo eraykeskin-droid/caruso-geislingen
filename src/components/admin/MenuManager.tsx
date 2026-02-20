@@ -406,6 +406,9 @@ const SortableCategory = ({
                     <div className="flex items-center gap-3">
                         <span className={`text-xl font-bold uppercase tracking-tight ${category.is_special ? 'text-secondary' : 'text-white'}`}>
                             {category.name}
+                            <span className="ml-3 text-[10px] text-gray-500 font-mono opacity-50 bg-white/5 px-2 py-0.5 rounded">
+                                {category.items?.length || 0}
+                            </span>
                         </span>
                         {!!category.is_special && <Star size={14} className="text-secondary fill-secondary animate-pulse" />}
                     </div>
