@@ -1,0 +1,234 @@
+---
+---
+
+<div
+    class="reservation-form-container w-full max-w-2xl mx-auto p-8 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-lg shadow-2xl"
+>
+    <form id="reservationForm" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Name -->
+            <div class="flex flex-col gap-2">
+                <label
+                    for="name"
+                    class="text-xs uppercase tracking-widest text-secondary font-bold"
+                    >Name</label
+                >
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white"
+                    placeholder="Dein Vor- und Nachname"
+                />
+            </div>
+
+            <!-- Email -->
+            <div class="flex flex-col gap-2">
+                <label
+                    for="email"
+                    class="text-xs uppercase tracking-widest text-secondary font-bold"
+                    >E-Mail</label
+                >
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white"
+                    placeholder="deine@mail.de"
+                />
+            </div>
+
+            <!-- Phone -->
+            <div class="flex flex-col gap-2">
+                <label
+                    for="phone"
+                    class="text-xs uppercase tracking-widest text-secondary font-bold"
+                    >Telefon</label
+                >
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    required
+                    class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white"
+                    placeholder="0176 ..."
+                />
+            </div>
+
+            <!-- Guests -->
+            <div class="flex flex-col gap-2">
+                <label
+                    for="guests"
+                    class="text-xs uppercase tracking-widest text-secondary font-bold"
+                    >Personenanzahl</label
+                >
+                <select
+                    id="guests"
+                    name="guests"
+                    required
+                    class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white appearance-none cursor-pointer"
+                >
+                    <option value="" disabled selected>Wählen ...</option>
+                    {
+                        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                            <option value={n}>{n} Personen</option>
+                        ))
+                    }
+                    <option value="11">Mehr als 10 (bitte Info)</option>
+                </select>
+            </div>
+
+            <!-- Date -->
+            <div class="flex flex-col gap-2">
+                <label
+                    for="date"
+                    class="text-xs uppercase tracking-widest text-secondary font-bold"
+                    >Datum</label
+                >
+                <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    required
+                    class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white"
+                />
+            </div>
+
+            <!-- Time -->
+            <div class="flex flex-col gap-2">
+                <label
+                    for="time"
+                    class="text-xs uppercase tracking-widest text-secondary font-bold"
+                    >Uhrzeit</label
+                >
+                <select
+                    id="time"
+                    name="time"
+                    required
+                    class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white appearance-none cursor-pointer"
+                >
+                    <option value="" disabled selected>Wählen ...</option>
+                    {
+                        [
+                            "18:00",
+                            "18:30",
+                            "19:00",
+                            "19:30",
+                            "20:00",
+                            "20:30",
+                            "21:00",
+                            "21:30",
+                            "22:00",
+                            "22:30",
+                            "23:00",
+                        ].map((t) => <option value={t}>{t} Uhr</option>)
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- Comment -->
+        <div class="flex flex-col gap-2">
+            <label
+                for="comment"
+                class="text-xs uppercase tracking-widest text-secondary font-bold"
+                >Bemerkung (Optional)</label
+            >
+            <textarea
+                id="comment"
+                name="comment"
+                rows="3"
+                class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white resize-none"
+                placeholder="Besondere Wünsche oder Anmerkungen ..."></textarea>
+        </div>
+
+        <div id="statusMessage" class="hidden text-sm p-4 rounded-lg"></div>
+
+        <button
+            type="submit"
+            id="submitBtn"
+            class="btn-caruso w-full mt-4 flex items-center justify-center gap-2 group"
+        >
+            <span>Anfrage Senden</span>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                class="group-hover:translate-x-1 transition-transform"
+                viewBox="0 0 16 16"
+            >
+                <path
+                    d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"
+                ></path>
+            </svg>
+        </button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById("reservationForm") as HTMLFormElement;
+    const submitBtn = document.getElementById("submitBtn") as HTMLButtonElement;
+    const statusMessage = document.getElementById("statusMessage");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = "Wird gesendet ...";
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            // Mocking the API call for now
+            // const response = await fetch('/api/save-reservation.php', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(data)
+            // });
+
+            console.log("Reservation Data:", data);
+
+            // Simulate success
+            setTimeout(() => {
+                if (statusMessage) {
+                    statusMessage.classList.remove(
+                        "hidden",
+                        "bg-red-500/20",
+                        "text-red-400"
+                    );
+                    statusMessage.classList.add(
+                        "bg-green-500/20",
+                        "text-green-400"
+                    );
+                    statusMessage.innerHTML =
+                        "Optimal! Deine Reservierungsanfrage wurde gesendet. Wir melden uns in Kürze per E-Mail bei dir.";
+                }
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "Anfrage Senden";
+            }, 1500);
+        } catch (error) {
+            if (statusMessage) {
+                statusMessage.classList.remove(
+                    "hidden",
+                    "bg-green-500/20",
+                    "text-green-400"
+                );
+                statusMessage.classList.add("bg-red-500/20", "text-red-400");
+                statusMessage.innerHTML =
+                    "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.";
+            }
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "Anfrage Senden";
+        }
+    });
+
+    // Set min date to today
+    const dateInput = document.getElementById("date") as HTMLInputElement;
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.min = today;
+</script>

@@ -1,0 +1,49 @@
+---
+interface Props {
+    name: string;
+    isSpecial?: boolean;
+    bgColor?: string;
+}
+
+const { name, isSpecial = false, bgColor = "#ffe08a" } = Astro.props;
+---
+
+<div
+    class={`category-section mb-12 last:mb-0 transition-all duration-300 ${
+        isSpecial ? "special-category p-6 border-l-4 border-secondary" : ""
+    }`}
+    style={isSpecial ? `background-color: ${bgColor}15;` : ""}
+>
+    <div class="flex items-center gap-4 mb-8">
+        <h2
+            class={`text-2xl md:text-3xl uppercase tracking-tighter ${
+                isSpecial ? "text-secondary" : "text-white"
+            }`}
+        >
+            {name}
+        </h2>
+        {
+            isSpecial && (
+                <span class="bg-secondary text-black text-[10px] font-bold uppercase py-1 px-2 tracking-widest animate-pulse">
+                    Special
+                </span>
+            )
+        }
+        <div
+            class={`h-[1px] flex-grow ${
+                isSpecial ? "bg-secondary/30" : "bg-white/10"
+            }`}
+        >
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6">
+        <slot />
+    </div>
+</div>
+
+<style>
+    .special-category {
+        box-shadow: 0 10px 30px -15px rgba(255, 224, 138, 0.1);
+    }
+</style>

@@ -1,0 +1,50 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Hero from "../components/Hero.astro";
+import OpeningHours from "../components/OpeningHours.astro";
+---
+
+<Layout title="Shisha Bar & Lounge in Geislingen">
+	<main>
+		<Hero />
+
+		<!-- Öffnungszeiten Section -->
+		<section class="py-24 px-6 bg-black border-t border-secondary/10">
+			<div class="max-w-4xl mx-auto">
+				<div class="text-center mb-16">
+					<h2
+						class="text-3xl md:text-5xl uppercase tracking-tighter mb-4"
+					>
+						Öffnungszeiten
+					</h2>
+					<div class="h-1 w-20 bg-secondary mx-auto"></div>
+				</div>
+
+				<OpeningHours />
+			</div>
+		</section>
+
+		<!-- Footer Placeholder logic could go here, or a separate component -->
+		<footer class="py-12 px-6 bg-black border-t border-white/5">
+			<div
+				class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-sm text-gray-400"
+			>
+				<div>© 2024 Café Caruso Geislingen</div>
+				<div class="flex gap-6">
+					<a
+						href="/impressum"
+						class="hover:text-secondary transition-colors underline decoration-secondary/30 underline-offset-4"
+						>Impressum</a
+					>
+					<a
+						href="/datenschutz"
+						class="hover:text-secondary transition-colors underline decoration-secondary/30 underline-offset-4"
+						>Datenschutz</a
+					>
+				</div>
+			</div>
+		</footer>
+	</main>
+</Layout>
+
+<style></style>

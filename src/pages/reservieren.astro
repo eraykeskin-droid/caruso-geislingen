@@ -1,0 +1,68 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ReservationForm from "../components/ReservationForm.astro";
+---
+
+<Layout title="Tischreservierung">
+    <main class="bg-black min-h-screen">
+        <!-- Header -->
+        <header
+            class="py-12 px-6 border-b border-white/5 bg-black/80 backdrop-blur-md z-30"
+        >
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <a
+                    href="/"
+                    class="text-secondary hover:text-white transition-colors"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"
+                        ></path>
+                    </svg>
+                </a>
+                <h1
+                    class="text-xl uppercase tracking-[0.2em] font-bold text-white"
+                >
+                    Reservierung
+                </h1>
+                <div class="w-6"></div>
+                <!-- Spacer -->
+            </div>
+        </header>
+
+        <section class="py-16 px-6">
+            <div class="max-w-4xl mx-auto text-center mb-12">
+                <h2
+                    class="text-3xl md:text-5xl uppercase tracking-tighter mb-4"
+                >
+                    Tisch Reservieren
+                </h2>
+                <p class="text-gray-400 max-w-lg mx-auto">
+                    Plane deinen Abend im Caruso. Fülle das Formular aus und wir
+                    bestätigen dir deine Reservierung per E-Mail.
+                </p>
+                <div class="h-1 w-20 bg-secondary mx-auto mt-8"></div>
+            </div>
+
+            <ReservationForm />
+
+            <div
+                class="max-w-2xl mx-auto mt-12 text-center text-gray-500 text-sm space-y-2"
+            >
+                <p>Bei Fragen kannst du uns auch telefonisch erreichen:</p>
+                <a
+                    href="tel:073319467928"
+                    class="text-secondary font-bold hover:underline"
+                    >07331 9467928</a
+                >
+            </div>
+        </section>
+    </main>
+</Layout>

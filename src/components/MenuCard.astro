@@ -1,0 +1,38 @@
+---
+interface Props {
+    name: string;
+    price: string | number;
+    unit?: string;
+    info?: string;
+}
+
+const { name, price, unit, info } = Astro.props;
+
+const formattedPrice =
+    typeof price === "number" ? price.toFixed(2).replace(".", ",") : price;
+---
+
+<div
+    class="menu-item group flex flex-col gap-1 pb-6 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors rounded-lg"
+>
+    <div class="flex justify-between items-baseline gap-4">
+        <h3
+            class="text-white text-lg font-medium group-hover:text-secondary transition-colors uppercase tracking-wide"
+        >
+            {name}
+        </h3>
+        <div
+            class="flex items-baseline gap-1 text-secondary font-bold whitespace-nowrap"
+        >
+            <span>{formattedPrice}</span>
+            <span class="text-xs">€</span>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center text-xs text-gray-500">
+        <span class="italic max-w-[80%]">{info || ""}</span>
+        <span class="uppercase tracking-widest">{unit || ""}</span>
+    </div>
+</div>
+
+<style></style>

@@ -1,0 +1,128 @@
+---
+import Layout from "../layouts/Layout.astro";
+import CategorySection from "../components/CategorySection.astro";
+import MenuCard from "../components/MenuCard.astro";
+
+// Mock data (will be replaced by MySQL fetch)
+const menuData = [
+    {
+        name: "Cocktails",
+        isSpecial: true,
+        bg_color: "#ffe08a",
+        items: [
+            {
+                name: "Sex on the Beach",
+                price: 9.5,
+                unit: "0,4l",
+                info: "Wodka, Pfirsichlikör, Orangen-, Ananas- & Cranberrysaft",
+            },
+            {
+                name: "Caipirinha",
+                price: 8.9,
+                unit: "0,4l",
+                info: "Pitu, Limetten, Rohrzucker",
+            },
+            {
+                name: "Pina Colada",
+                price: 9.5,
+                unit: "0,4l",
+                info: "Weißer Rum, Kokossirup, Sahne, Ananassaft",
+            },
+        ],
+    },
+    {
+        name: "Alkoholfreie Getränke",
+        items: [
+            {
+                name: "Cola / Fanta / Mezzo",
+                price: 4.2,
+                unit: "0,33l",
+                info: "Klassisch erfrischend",
+            },
+            {
+                name: "Mineralwasser",
+                price: 3.5,
+                unit: "0,25l",
+                info: "Spritzig oder Still",
+            },
+            {
+                name: "Apfelschorle",
+                price: 4.2,
+                unit: "0,33l",
+                info: "Naturtrüb",
+            },
+        ],
+    },
+];
+---
+
+<Layout title="Getränkekarte">
+    <main class="bg-black min-h-screen">
+        <!-- Header -->
+        <header
+            class="py-12 px-6 border-b border-white/5 sticky top-0 bg-black/80 backdrop-blur-md z-30"
+        >
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <a
+                    href="/"
+                    class="text-secondary hover:text-white transition-colors"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"
+                        ></path>
+                    </svg>
+                </a>
+                <h1
+                    class="text-xl uppercase tracking-[0.2em] font-bold text-white"
+                >
+                    Getränkekarte
+                </h1>
+                <div class="w-6"></div>
+                <!-- Spacer -->
+            </div>
+        </header>
+
+        <!-- Menu Content -->
+        <div class="py-12 px-6 max-w-4xl mx-auto">
+            {
+                menuData.map((category) => (
+                    <CategorySection
+                        name={category.name}
+                        isSpecial={category.isSpecial}
+                        bgColor={category.bg_color}
+                    >
+                        {category.items.map((item) => (
+                            <MenuCard
+                                name={item.name}
+                                price={item.price}
+                                unit={item.unit}
+                                info={item.info}
+                            />
+                        ))}
+                    </CategorySection>
+                ))
+            }
+
+            <div class="mt-20 pb-12 text-center">
+                <p class="text-xs text-gray-600 uppercase tracking-widest mb-4">
+                    Alle Preise inkl. MwSt.
+                </p>
+                <div class="flex justify-center gap-4">
+                    <div class="h-1 w-8 bg-secondary/20"></div>
+                    <div class="h-1 w-8 bg-secondary"></div>
+                    <div class="h-1 w-8 bg-secondary/20"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<style></style>
