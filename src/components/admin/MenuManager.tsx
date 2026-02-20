@@ -427,20 +427,28 @@ const SortableCategory = ({
                 </button>
 
                 {category.items && category.items.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
                         {category.items.map(item => (
-                            <div key={item.id} className="p-4 bg-black/40 rounded-xl border border-white/5 group hover:border-secondary/20 transition-all">
-                                <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                        <h4 className="text-white font-bold text-sm tracking-wide">{item.name}</h4>
-                                        <span className="text-[10px] text-gray-500 uppercase">{item.unit}</span>
+                            <div key={item.id} className="flex items-center justify-between p-3 bg-black/40 rounded-lg border border-white/5 group hover:border-secondary/20 transition-all">
+                                <div className="flex items-center gap-4 flex-grow min-w-0">
+                                    <div className="flex flex-col min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="text-white font-bold text-xs truncate uppercase tracking-wide">{item.name}</h4>
+                                            <span className="text-[9px] text-gray-500 font-mono whitespace-nowrap">({item.unit || '-'})</span>
+                                        </div>
+                                        <p className="text-[9px] text-gray-600 italic truncate">{item.info || 'Keine Info'}</p>
                                     </div>
-                                    <span className="text-secondary font-bold text-sm">{typeof item.price === 'number' ? item.price.toFixed(2) : parseFloat(item.price).toFixed(2)}€</span>
                                 </div>
-                                <p className="text-[10px] text-gray-600 mb-4 italic truncate">{item.info}</p>
-                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => onEditItem(item)} className="p-1.5 text-gray-500 hover:text-secondary"><Edit2 size={12} /></button>
-                                    <button onClick={() => onDeleteItem(item.id)} className="p-1.5 text-gray-500 hover:text-red-500"><Trash2 size={12} /></button>
+
+                                <div className="flex items-center gap-6 shrink-0">
+                                    <span className="text-secondary font-bold text-xs min-w-[50px] text-right">
+                                        {typeof item.price === 'number' ? item.price.toFixed(2) : parseFloat(item.price).toFixed(2)}€
+                                    </span>
+
+                                    <div className="flex items-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => onEditItem(item)} className="p-1.5 text-gray-400 hover:text-secondary hover:bg-secondary/10 rounded transition-all"><Edit2 size={12} /></button>
+                                        <button onClick={() => onDeleteItem(item.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-500/10 rounded transition-all"><Trash2 size={12} /></button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
