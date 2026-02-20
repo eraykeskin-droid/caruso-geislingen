@@ -38,6 +38,9 @@ const {
 	<body>
 		<slot />
 
+		<BackToTop />
+		<CookieBanner />
+
 		<script>
 			// Intercept all internal anchor links to keep the URL clean (remove #)
 			document.querySelectorAll('a[href^="#"]').forEach((anchor) => {

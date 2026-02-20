@@ -1,0 +1,102 @@
+---
+---
+
+<div
+    id="cookie-consent"
+    class="fixed bottom-6 left-6 right-6 md:left-8 md:right-auto md:max-w-md z-[100] p-6 bg-black/80 border border-white/10 backdrop-blur-xl rounded-2xl shadow-2xl transition-all duration-700 translate-y-[200%] opacity-0 invisible"
+>
+    <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 bg-secondary/20 rounded-full flex items-center justify-center text-secondary"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    ><path
+                        d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"
+                    ></path><path d="M8.5 8.5v.01"></path><path d="M16 15.5v.01"
+                    ></path><path d="M12 12v.01"></path><path d="M11 17v.01"
+                    ></path><path d="M7 14v.01"></path>
+                </svg>
+            </div>
+            <h3 class="text-white font-bold uppercase tracking-widest text-sm">
+                Cookie-Einstellungen
+            </h3>
+        </div>
+
+        <p class="text-xs text-gray-400 leading-relaxed">
+            Wir verwenden Cookies, um dein Erlebnis auf unserer Website zu
+            verbessern. Manche sind essenziell, andere helfen uns, diese Seite
+            zu optimieren.
+        </p>
+
+        <div class="flex gap-3 mt-2">
+            <button
+                id="accept-cookies"
+                class="flex-1 py-3 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all hover:bg-white active:scale-95"
+            >
+                Alle Akzeptieren
+            </button>
+            <button
+                id="reject-cookies"
+                class="flex-1 py-3 bg-white/5 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg border border-white/10 transition-all hover:bg-white/10 active:scale-95"
+            >
+                Nur Essenziell
+            </button>
+        </div>
+
+        <div class="text-[10px] text-center text-gray-500">
+            <a
+                href="/datenschutz"
+                class="hover:text-secondary underline underline-offset-2"
+                >Datenschutzerklärung</a
+            >
+        </div>
+    </div>
+</div>
+
+<script>
+    const banner = document.getElementById("cookie-consent");
+    const acceptBtn = document.getElementById("accept-cookies");
+    const rejectBtn = document.getElementById("reject-cookies");
+
+    if (banner && acceptBtn && rejectBtn) {
+        // Check if user has already made a choice
+        const consent = localStorage.getItem("cookie-consent");
+
+        if (!consent) {
+            // Show banner with delay
+            setTimeout(() => {
+                banner.classList.remove(
+                    "translate-y-[200%]",
+                    "opacity-0",
+                    "invisible"
+                );
+                banner.classList.add("translate-y-0", "opacity-100", "visible");
+            }, 2000);
+        }
+
+        const hideBanner = () => {
+            banner.classList.add("translate-y-[200%]", "opacity-0");
+            setTimeout(() => banner.classList.add("invisible"), 700);
+        };
+
+        acceptBtn.addEventListener("click", () => {
+            localStorage.setItem("cookie-consent", "all");
+            hideBanner();
+        });
+
+        rejectBtn.addEventListener("click", () => {
+            localStorage.setItem("cookie-consent", "essential");
+            hideBanner();
+        });
+    }
+</script>
