@@ -55,30 +55,37 @@ const MenuManager = () => {
             let res = await fetch('/api/get-menu.php');
             let contentType = res.headers.get("content-type");
 
-            if (!contentType || !contentType.includes("application/json")) {
-                // Priority 2: Local Dev Bridge (static JSON)
-                res = await fetch('/api/menu.json');
-                contentType = res.headers.get("content-type");
-            }
-
             if (contentType && contentType.includes("application/json")) {
                 const data = await res.json();
-                if (Array.isArray(data)) {
+                if (Array.isArray(data) && data.length > 0) {
                     setCategories(data);
-                    // Also sync to local storage for dev reference
                     localStorage.setItem('caruso_menu_cache', JSON.stringify(data));
                     return;
                 }
             }
 
-            // Fallback for local development or if API fails
+            // Priority 2: LocalStorage (User's current customizations)
             const cached = localStorage.getItem('caruso_menu_cache');
             if (cached) {
-                setCategories(JSON.parse(cached));
-            } else {
-                // Initial Data
-                setCategories([]);
+                const cachedData = JSON.parse(cached);
+                if (Array.isArray(cachedData) && cachedData.length > 0) {
+                    setCategories(cachedData);
+                    return;
+                }
             }
+
+            // Priority 3: Static menu.json (Bootstrap / First Load)
+            let staticRes = await fetch('/api/menu.json');
+            if (staticRes.ok) {
+                const contentTypeStatic = staticRes.headers.get("content-type");
+                if (contentTypeStatic && contentTypeStatic.includes("application/json")) {
+                    const staticData = await staticRes.json();
+                    setCategories(staticData);
+                    return;
+                }
+            }
+
+            setCategories([]);
         } catch (err) {
             console.error('Error fetching menu, using cache:', err);
             const cached = localStorage.getItem('caruso_menu_cache');
@@ -172,8 +179,8 @@ const MenuManager = () => {
     return (
         <div className="p-6 relative">
             {saving && (
-                <div className="fixed top-20 right-8 z-50 flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg animate-fade-in border border-black/10">
-                    <div className="w-2 h-2 bg-black rounded-full animate-ping text-[8px]"></div>
+                <div className="fixed top-20 right-8 z-50 flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest rounded-none shadow-lg animate-fade-in border border-black/10">
+                    <div className="w-2 h-2 bg-black rounded-none animate-ping text-[8px]"></div>
                     Speichern...
                 </div>
             )}
@@ -182,7 +189,7 @@ const MenuManager = () => {
                 <h2 className="text-xl font-bold text-white uppercase tracking-widest italic border-l-4 border-secondary pl-4">Menü-Verwaltung</h2>
                 <button
                     onClick={() => setModal({ type: 'category', mode: 'add', data: { name: '', is_special: false, bg_color: '#000000' } })}
-                    className="flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors rounded shadow-lg"
+                    className="flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors rounded-none shadow-lg"
                 >
                     <Plus size={14} /> Kategorie hinzufügen
                 </button>
@@ -207,8 +214,8 @@ const MenuManager = () => {
             </DndContext>
 
             {modal && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
-                    <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-8 shadow-2xl">
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80">
+                    <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-none p-8 shadow-2xl">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-bold uppercase tracking-widest text-secondary">
                                 {modal.mode === 'add' ? 'Neu:' : 'Bearbeiten:'} {modal.type === 'category' ? 'Kategorie' : 'Artikel'}
@@ -227,7 +234,7 @@ const MenuManager = () => {
                                             type="text"
                                             value={modal.data.name}
                                             onChange={(e) => setModal({ ...modal, data: { ...modal.data, name: e.target.value } })}
-                                            className="bg-black border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-secondary transition-colors"
+                                            className="bg-black border border-white/10 rounded-none px-4 py-2 text-white outline-none focus:border-secondary transition-colors"
                                         />
                                     </div>
                                     <div className="flex items-center gap-4 py-2">
@@ -265,7 +272,7 @@ const MenuManager = () => {
                                             type="text"
                                             value={modal.data.name}
                                             onChange={(e) => setModal({ ...modal, data: { ...modal.data, name: e.target.value } })}
-                                            className="bg-black border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-secondary transition-colors"
+                                            className="bg-black border border-white/10 rounded-none px-4 py-2 text-white outline-none focus:border-secondary transition-colors"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -276,7 +283,7 @@ const MenuManager = () => {
                                                 step="0.1"
                                                 value={modal.data.price}
                                                 onChange={(e) => setModal({ ...modal, data: { ...modal.data, price: parseFloat(e.target.value) } })}
-                                                className="bg-black border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-secondary transition-colors"
+                                                className="bg-black border border-white/10 rounded-none px-4 py-2 text-white outline-none focus:border-secondary transition-colors"
                                             />
                                         </div>
                                         <div className="flex flex-col gap-2">
@@ -285,7 +292,7 @@ const MenuManager = () => {
                                                 type="text"
                                                 value={modal.data.unit}
                                                 onChange={(e) => setModal({ ...modal, data: { ...modal.data, unit: e.target.value } })}
-                                                className="bg-black border border-white/10 rounded-lg px-4 py-2 text-white outline-none focus:border-secondary transition-colors"
+                                                className="bg-black border border-white/10 rounded-none px-4 py-2 text-white outline-none focus:border-secondary transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -302,7 +309,7 @@ const MenuManager = () => {
 
                             <button
                                 onClick={handleSave}
-                                className="w-full mt-6 py-3 bg-secondary text-black font-bold uppercase tracking-widest rounded-lg hover:bg-white transition-all active:scale-95 flex items-center justify-center gap-2"
+                                className="w-full mt-6 py-3 bg-secondary text-black font-bold uppercase tracking-widest rounded-none hover:bg-white transition-all active:scale-95 flex items-center justify-center gap-2"
                             >
                                 <Save size={16} /> Speichern
                             </button>
@@ -320,10 +327,19 @@ const SortableCategory = ({
     category: Category, onEdit: () => void, onDelete: () => void, onAddItem: () => void, onEditItem: (i: MenuItem) => void, onDeleteItem: (id: string) => void
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: category.id });
-    const style = { transform: CSS.Transform.toString(transform), transition };
+
+    // Dynamic styles based on custom bg_color
+    const color = category.bg_color || '#ffe08a';
+    const dynamicStyle = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        backgroundColor: color + '15', // Increased opacity (approx 8%)
+        borderColor: color + '30', // More visible border
+        boxShadow: category.is_special ? `0 0 40px ${color}15` : 'none'
+    };
 
     return (
-        <div ref={setNodeRef} style={style} className={`p-6 rounded-2xl border ${category.is_special ? 'bg-secondary/10 border-secondary/30 shadow-[0_0_30px_rgba(255,224,138,0.05)]' : 'bg-white/[0.03] border-white/10'}`}>
+        <div ref={setNodeRef} style={dynamicStyle} className="p-6 rounded-none border transition-all duration-300">
             <div className="flex items-center gap-4">
                 <button {...attributes} {...listeners} className="text-gray-600 cursor-grab active:cursor-grabbing hover:text-white transition-colors flex-shrink-0">
                     <GripVertical size={20} />
@@ -335,18 +351,18 @@ const SortableCategory = ({
                             <span className="text-xl font-bold uppercase tracking-tight leading-none">
                                 {category.name}
                             </span>
-                            <span className="text-[9px] text-white/70 bg-white/10 px-2.5 py-1 rounded-full border border-white/10 font-mono shadow-sm flex items-center justify-center leading-none h-5">
+                            <span className="text-[9px] text-white/70 bg-white/10 px-2.5 py-1 rounded-none border border-white/10 font-mono shadow-sm flex items-center justify-center leading-none h-5">
                                 {category.items?.length || 0} Artikel
                             </span>
                             {!!category.is_special && <Star size={14} className="text-secondary fill-secondary animate-pulse" />}
-                            {!!category.is_special && <span className="text-[8px] bg-secondary text-black font-black px-1.5 py-1 rounded-sm uppercase tracking-tighter leading-none h-4 flex items-center">Spezial</span>}
+                            {!!category.is_special && <span className="text-[8px] bg-secondary text-black font-black px-1.5 py-1 rounded-none uppercase tracking-tighter leading-none h-4 flex items-center">Spezial</span>}
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button onClick={onEdit} className="p-2 bg-white/5 rounded text-gray-500 hover:text-secondary hover:bg-secondary/10 transition-all font-bold text-[10px]" title="Kategorie bearbeiten"><Edit2 size={16} /></button>
-                        <button onClick={onDelete} className="p-2 bg-white/5 rounded text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all font-bold text-[10px]" title="Kategorie löschen"><Trash2 size={16} /></button>
-                        <div className="w-8 h-8 rounded-full border-2 border-white/20 ml-2 shadow-inner" style={{ backgroundColor: category.bg_color }}></div>
+                        <button onClick={onEdit} className="p-2 bg-white/5 rounded-none text-gray-500 hover:text-secondary hover:bg-secondary/10 transition-all font-bold text-[10px]" title="Kategorie bearbeiten"><Edit2 size={16} /></button>
+                        <button onClick={onDelete} className="p-2 bg-white/5 rounded-none text-gray-500 hover:text-red-500 hover:bg-red-500/10 transition-all font-bold text-[10px]" title="Kategorie löschen"><Trash2 size={16} /></button>
+                        <div className="w-8 h-8 rounded-none border-2 border-white/20 ml-2 shadow-inner" style={{ backgroundColor: category.bg_color }}></div>
                     </div>
                 </div>
             </div>
@@ -354,7 +370,7 @@ const SortableCategory = ({
             <div className="mt-6 ml-12 border-l-2 border-white/5 pl-8 space-y-4">
                 <button
                     onClick={onAddItem}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-secondary/5 border border-secondary/20 text-[10px] uppercase font-bold text-secondary/70 hover:text-secondary hover:bg-secondary/10 hover:border-secondary/40 transition-all rounded-md group mt-2 mb-6"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-secondary/5 border border-secondary/20 text-[10px] uppercase font-bold text-secondary/70 hover:text-secondary hover:bg-secondary/10 hover:border-secondary/40 transition-all rounded-none group mt-2 mb-6"
                 >
                     <Plus size={14} className="group-hover:rotate-90 transition-transform" /> Artikel hinzufügen
                 </button>

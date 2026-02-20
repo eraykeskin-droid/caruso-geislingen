@@ -37,7 +37,7 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
     if (!isLoggedIn) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center px-6">
-                <div className="w-full max-w-md p-8 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-lg shadow-2xl">
+                <div className="w-full max-w-md p-8 rounded-none bg-white/[0.03] border border-white/10">
                     <div className="flex flex-col items-center mb-8">
                         <img src="/caruso-logo-white.svg" alt="Logo" className="w-32 mb-4" />
                         <h1 className="text-xl uppercase tracking-widest text-secondary font-bold">Admin Panel</h1>
@@ -72,7 +72,7 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            <nav className="border-b border-white/5 bg-black/80 backdrop-blur-md sticky top-0 z-50">
+            <nav className="border-b border-white/5 bg-black sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <img src="/caruso-logo-white.svg" alt="Logo" className="h-8" />

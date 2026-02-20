@@ -8,10 +8,12 @@ import Layout from "../layouts/Layout.astro";
     <main class="bg-black min-h-screen">
         <!-- Header -->
         <header
-            class="py-12 px-6 border-b border-white/5 sticky top-0 bg-black/80 backdrop-blur-md z-40 transition-all duration-300"
+            class="py-6 border-b border-white/5 sticky top-0 bg-black z-40"
             id="menu-header"
         >
-            <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div
+                class="max-w-4xl mx-auto px-6 flex justify-between items-center"
+            >
                 <a
                     href="/"
                     class="text-secondary hover:scale-110 active:scale-95 transition-all"
@@ -31,7 +33,7 @@ import Layout from "../layouts/Layout.astro";
                     </svg>
                 </a>
                 <h1
-                    class="text-xl uppercase tracking-[0.3em] font-bold text-white italic"
+                    class="text-xl uppercase tracking-[0.3em] font-bold text-white"
                 >
                     Getränkekarte
                 </h1>
@@ -48,7 +50,7 @@ import Layout from "../layouts/Layout.astro";
                 class="flex flex-col items-center justify-center py-32 animate-pulse"
             >
                 <div
-                    class="w-12 h-12 border-2 border-secondary/20 border-t-secondary rounded-full animate-spin mb-6"
+                    class="w-12 h-12 border-2 border-secondary/20 border-t-secondary rounded-none animate-spin mb-6"
                 >
                 </div>
                 <p
@@ -69,9 +71,9 @@ import Layout from "../layouts/Layout.astro";
                 Café Caruso &bull; Geislingen &bull; Seit 1989
             </p>
             <div class="flex justify-center gap-2 pb-8 opacity-20">
-                <div class="w-1 h-1 bg-secondary rounded-full"></div>
-                <div class="w-1 h-1 bg-secondary rounded-full"></div>
-                <div class="w-1 h-1 bg-secondary rounded-full"></div>
+                <div class="w-1 h-1 bg-secondary rounded-none"></div>
+                <div class="w-1 h-1 bg-secondary rounded-none"></div>
+                <div class="w-1 h-1 bg-secondary rounded-none"></div>
             </div>
         </footer>
     </main>
@@ -83,145 +85,86 @@ import Layout from "../layouts/Layout.astro";
         if (!container) return;
 
         try {
-            // Priority 1: Backend API
+            // Priority 1: Primary PHP API
             let res = await fetch("/api/get-menu.php");
             let contentType = res.headers.get("content-type");
 
-            if (!contentType || !contentType.includes("application/json")) {
-                // Priority 2: Static JSON Bridge (for local development)
-                res = await fetch("/api/menu.json");
-                contentType = res.headers.get("content-type");
-            }
-
-            let data;
             if (contentType && contentType.includes("application/json")) {
-                data = await res.json();
-            } else {
-                throw new Error("No JSON response");
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    renderMenu(container, data);
+                    localStorage.setItem(
+                        "caruso_menu_cache",
+                        JSON.stringify(data)
+                    );
+                    return;
+                }
             }
 
-            if (!Array.isArray(data) || data.length === 0) {
-                renderMenuFromCacheOrMock(container);
-                return;
+            // Priority 2: LocalStorage (Preferred Fallback)
+            const cached = localStorage.getItem("caruso_menu_cache");
+            if (cached) {
+                const cachedData = JSON.parse(cached);
+                if (Array.isArray(cachedData) && cachedData.length > 0) {
+                    renderMenu(container, cachedData);
+                    return;
+                }
             }
 
-            renderMenu(container, data);
-            localStorage.setItem("caruso_menu_cache", JSON.stringify(data));
+            // Priority 3: Static menu.json
+            let staticRes = await fetch("/api/menu.json");
+            if (staticRes.ok) {
+                const staticData = await staticRes.json();
+                if (Array.isArray(staticData) && staticData.length > 0) {
+                    renderMenu(container, staticData);
+                    return;
+                }
+            }
+
+            // Hard Fallback: Mock Data
+            renderMenuFromMock(container);
         } catch (err) {
-            console.warn("Backend Fetch failed, using fallback.", err);
-            renderMenuFromCacheOrMock(container);
+            console.warn("Menu load failed, trying cache.", err);
+            const cached = localStorage.getItem("caruso_menu_cache");
+            if (cached) {
+                renderMenu(container, JSON.parse(cached));
+            } else {
+                renderMenuFromMock(container);
+            }
         }
     }
 
-    function renderMenuFromCacheOrMock(container: HTMLElement) {
-        const cached = localStorage.getItem("caruso_menu_cache");
-        if (cached) {
-            renderMenu(container, JSON.parse(cached));
-        } else {
-            // Extracted real data from the previous website
-            const mockData = [
-                {
-                    name: "Winterkarte: Specials",
-                    is_special: true,
-                    bg_color: "#ffe08a",
-                    items: [
-                        {
-                            name: "Winter Mojito",
-                            price: 6.9,
-                            unit: "0,4l",
-                            info: "Limetten, Rohrzucker, Minze, Säfte",
-                        },
-                        {
-                            name: "Orange Cinnamon Fizz",
-                            price: 5.9,
-                            unit: "0,4l",
-                            info: "Orangen, Zimt, Soda",
-                        },
-                        {
-                            name: "Cherry Cola Winter",
-                            price: 5.9,
-                            unit: "0,4l",
-                            info: "Kirscharoma, Cola, Winterliche Gewürze",
-                        },
-                    ],
-                },
-                {
-                    name: "Biere",
-                    is_special: false,
-                    items: [
-                        {
-                            name: "Halbe",
-                            price: 3.9,
-                            unit: "0,5l",
-                            info: "Frisch vom Fass",
-                        },
-                        {
-                            name: "Hefeweizen",
-                            price: 3.9,
-                            unit: "0,5l",
-                            info: "",
-                        },
-                        { name: "Radler", price: 3.6, unit: "0,33l", info: "" },
-                        {
-                            name: "Corona / Desperados",
-                            price: 4.4,
-                            unit: "0,33l",
-                            info: "",
-                        },
-                    ],
-                },
-                {
-                    name: "Softdrinks",
-                    is_special: false,
-                    items: [
-                        {
-                            name: "Coca Cola / Zero",
-                            price: 4.2,
-                            unit: "0,33l",
-                            info: "",
-                        },
-                        {
-                            name: "Fanta / Sprite / Spezi",
-                            price: 4.2,
-                            unit: "0,33l",
-                            info: "",
-                        },
-                        {
-                            name: "Elephant Bay Eistee",
-                            price: 4.2,
-                            unit: "0,33l",
-                            info: "Verschiedene Sorten",
-                        },
-                    ],
-                },
-                {
-                    name: "Cocktails",
-                    is_special: true,
-                    bg_color: "#ffe08a",
-                    items: [
-                        {
-                            name: "Caipirinha",
-                            price: 7.9,
-                            unit: "0,4l",
-                            info: "Pitu, Rohrzucker, Limette",
-                        },
-                        {
-                            name: "Sex on the Beach",
-                            price: 7.9,
-                            unit: "0,4l",
-                            info: "Wodka, Pfirsichlikör, Säfte",
-                        },
-                        {
-                            name: "Mojito",
-                            price: 7.9,
-                            unit: "0,4l",
-                            info: "Rum, Minze, Limette",
-                        },
-                    ],
-                },
-            ];
-            renderMenu(container, mockData);
-        }
+    function renderMenuFromMock(container: HTMLElement) {
+        const mockData = [
+            {
+                name: "Biere",
+                is_special: false,
+                bg_color: "#000000",
+                items: [
+                    {
+                        name: "Halbe",
+                        price: 3.9,
+                        unit: "0,5l",
+                        info: "Frisch vom Fass",
+                    },
+                    { name: "Hefeweizen", price: 3.9, unit: "0,5l", info: "" },
+                ],
+            },
+            {
+                name: "Cocktails",
+                is_special: true,
+                bg_color: "#ffe08a",
+                items: [
+                    {
+                        name: "Caipirinha",
+                        price: 7.9,
+                        unit: "0,4l",
+                        info: "Pitu, Rohrzucker, Limette",
+                    },
+                ],
+            },
+        ];
+        renderMenu(container, mockData);
     }
 
     function renderMenu(container: HTMLElement, data: any[]) {
@@ -229,43 +172,52 @@ import Layout from "../layouts/Layout.astro";
 
         data.forEach((category, catIdx) => {
             const isSpecial = !!category.is_special;
-            const bgColor = category.bg_color || "#ffe08a";
+            const bgColor =
+                category.bg_color || (isSpecial ? "#ffe08a" : "#000000");
 
             const section = document.createElement("div");
             section.className =
                 "category-section mb-16 last:mb-0 transition-all duration-700 opacity-0 transform translate-y-8";
             section.style.animationDelay = catIdx * 0.15 + "s";
 
-            if (isSpecial) {
+            if (bgColor !== "#000000" || isSpecial) {
                 section.classList.add(
-                    "special-category",
-                    "p-8",
+                    "p-6",
+                    "md:p-10",
+                    "rounded-none",
                     "border-l-4",
-                    "border-secondary",
-                    "rounded-r-2xl"
+                    "transition-all",
+                    "duration-500"
                 );
-                section.style.backgroundColor = bgColor + "08";
+
+                // Subtle glass background
+                section.style.backgroundColor = bgColor + "10";
                 section.style.borderColor = bgColor;
+
+                // Modern glow effect (removed blur/glow as requested)
+                section.style.boxShadow = `none`;
             }
 
-            // Category Header
-            let headerHtml =
-                '<div class="flex items-center gap-6 mb-10">' +
-                '<h2 class="text-2xl md:text-4xl font-bold uppercase tracking-tighter italic ' +
-                (isSpecial ? "text-secondary" : "text-white") +
-                '">' +
-                category.name +
-                "</h2>" +
-                (isSpecial
-                    ? '<span class="bg-secondary text-black text-[9px] font-black uppercase py-1 px-3 tracking-[0.2em] rounded-sm animate-pulse">Special</span>'
-                    : "") +
-                '<div class="h-[1px] flex-grow ' +
-                (isSpecial ? "bg-secondary/20" : "bg-white/10") +
-                '"></div>' +
-                "</div>";
+            let headerHtml = `
+                <div class="flex items-center gap-6 mb-8">
+                    <h2 class="text-2xl md:text-4xl font-bold uppercase tracking-tighter italic ${
+                        isSpecial ? "text-secondary" : "text-white"
+                    }">
+                        ${category.name}
+                    </h2>
+                    ${
+                        isSpecial
+                            ? '<span class="bg-secondary text-black text-[9px] font-black uppercase py-1 px-3 tracking-[0.2em] rounded-none animate-pulse">Special</span>'
+                            : ""
+                    }
+                    <div class="h-[1px] flex-grow ${
+                        isSpecial ? "bg-secondary/20" : "bg-white/10"
+                    }"></div>
+                </div>
+            `;
 
-            // Items Grid
-            let itemsHtml = '<div class="grid grid-cols-1 gap-y-4">';
+            let itemsHtml =
+                '<div class="grid grid-cols-1 gap-y-0 text-left w-full">';
             if (category.items && Array.isArray(category.items)) {
                 itemsHtml += category.items
                     .map((item: any) => {
@@ -277,29 +229,27 @@ import Layout from "../layouts/Layout.astro";
                             .toFixed(2)
                             .replace(".", ",");
 
-                        return (
-                            '<div class="menu-item group flex flex-col gap-1 py-4 border-b border-white/[0.03] last:border-0 hover:bg-white/[0.01] transition-all duration-300 rounded-lg">' +
-                            '<div class="flex justify-between items-baseline gap-4">' +
-                            '<h3 class="text-white text-base md:text-lg font-bold group-hover:text-secondary transition-colors uppercase tracking-wider italic">' +
-                            item.name +
-                            "</h3>" +
-                            '<div class="flex items-baseline gap-0.5 text-secondary font-black whitespace-nowrap">' +
-                            "<span>" +
-                            formattedPrice +
-                            "</span>" +
-                            '<span class="text-[10px] ml-0.5">€</span>' +
-                            "</div>" +
-                            "</div>" +
-                            '<div class="flex justify-between items-center text-[10px] text-gray-500 font-medium tracking-wide">' +
-                            '<span class="italic opacity-70">' +
-                            (item.info || "") +
-                            "</span>" +
-                            '<span class="uppercase tracking-widest text-[9px] opacity-40">' +
-                            (item.unit || "") +
-                            "</span>" +
-                            "</div>" +
-                            "</div>"
-                        );
+                        return `
+                        <div class="menu-item group flex flex-col gap-1 py-4 border-b border-white/[0.05] last:border-0 hover:bg-white/[0.01] transition-all duration-300 rounded-none">
+                            <div class="flex justify-between items-baseline gap-4">
+                                <h3 class="text-white text-base font-bold group-hover:text-secondary transition-colors uppercase tracking-wider">${
+                                    item.name
+                                }</h3>
+                                <div class="flex items-baseline gap-0.5 text-secondary font-black whitespace-nowrap">
+                                    <span>${formattedPrice}</span>
+                                    <span class="text-[10px] ml-0.5">€</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center text-[11px] text-gray-300 font-medium tracking-wide">
+                                <span class="opacity-90">${
+                                    item.info || ""
+                                }</span>
+                                <span class="uppercase tracking-widest text-[10px] font-bold text-gray-400">${
+                                    item.unit || ""
+                                }</span>
+                            </div>
+                        </div>
+                    `;
                     })
                     .join("");
             }
@@ -308,7 +258,6 @@ import Layout from "../layouts/Layout.astro";
             section.innerHTML = headerHtml + itemsHtml;
             container.appendChild(section);
 
-            // Trigger animation
             setTimeout(() => {
                 section.classList.remove("opacity-0", "translate-y-8");
                 section.classList.add("opacity-100", "translate-y-0");
@@ -316,24 +265,17 @@ import Layout from "../layouts/Layout.astro";
         });
     }
 
+    // Initialize
     loadMenu();
 
-    // Scroll Header Shadow
+    // Header Scroll behavior — subtle shadow only, no size change
     window.addEventListener("scroll", () => {
         const header = document.getElementById("menu-header");
         if (header) {
-            if (header.classList && window.scrollY > 20) {
-                header.classList.add(
-                    "shadow-[0_10px_30px_rgba(0,0,0,0.8)]",
-                    "py-6"
-                );
-                header.classList.remove("py-12");
-            } else if (header.classList) {
-                header.classList.remove(
-                    "shadow-[0_10px_30px_rgba(0,0,0,0.8)]",
-                    "py-6"
-                );
-                header.classList.add("py-12");
+            if (window.scrollY > 20) {
+                header.style.boxShadow = "0 4px 20px rgba(0,0,0,0.6)";
+            } else {
+                header.style.boxShadow = "none";
             }
         }
     });
@@ -343,11 +285,9 @@ import Layout from "../layouts/Layout.astro";
     .special-category {
         box-shadow: 0 20px 50px -20px rgba(255, 224, 138, 0.05);
     }
-
     .menu-item {
         position: relative;
     }
-
     .menu-item::after {
         content: "";
         position: absolute;
@@ -359,7 +299,6 @@ import Layout from "../layouts/Layout.astro";
         transition: width 0.4s ease;
         opacity: 0.3;
     }
-
     .menu-item:hover::after {
         width: 100%;
     }

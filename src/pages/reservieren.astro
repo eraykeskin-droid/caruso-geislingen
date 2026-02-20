@@ -6,13 +6,14 @@ import ReservationForm from "../components/ReservationForm.astro";
 <Layout title="Tischreservierung">
     <main class="bg-black min-h-screen">
         <!-- Header -->
-        <header
-            class="py-12 px-6 border-b border-white/5 bg-black/80 backdrop-blur-md z-30"
-        >
-            <div class="max-w-4xl mx-auto flex justify-between items-center">
+        <header class="py-6 border-b border-white/5 sticky top-0 bg-black z-40">
+            <div
+                class="max-w-4xl mx-auto px-6 flex justify-between items-center"
+            >
                 <a
                     href="/"
-                    class="text-secondary hover:text-white transition-colors"
+                    class="text-secondary hover:scale-110 active:scale-95 transition-all"
+                    aria-label="Zurück zur Startseite"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -28,12 +29,11 @@ import ReservationForm from "../components/ReservationForm.astro";
                     </svg>
                 </a>
                 <h1
-                    class="text-xl uppercase tracking-[0.2em] font-bold text-white"
+                    class="text-xl uppercase tracking-[0.3em] font-bold text-white"
                 >
                     Reservierung
                 </h1>
                 <div class="w-6"></div>
-                <!-- Spacer -->
             </div>
         </header>
 
