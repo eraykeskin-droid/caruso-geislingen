@@ -1,21 +1,21 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import CategorySection from "../components/CategorySection.astro";
-import MenuCard from "../components/MenuCard.astro";
 
-// Initial empty state, will be filled by client-side fetch for dynamic updates
+// Dynamic menu page - Fetches from MySQL on IONOS, falls back to LocalStorage locally
 ---
 
 <Layout title="Getränkekarte">
     <main class="bg-black min-h-screen">
         <!-- Header -->
         <header
-            class="py-12 px-6 border-b border-white/5 sticky top-0 bg-black/80 backdrop-blur-md z-30"
+            class="py-12 px-6 border-b border-white/5 sticky top-0 bg-black/80 backdrop-blur-md z-40 transition-all duration-300"
+            id="menu-header"
         >
             <div class="max-w-4xl mx-auto flex justify-between items-center">
                 <a
                     href="/"
-                    class="text-secondary hover:text-white transition-colors"
+                    class="text-secondary hover:scale-110 active:scale-95 transition-all"
+                    aria-label="Zurück zur Startseite"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -31,7 +31,7 @@ import MenuCard from "../components/MenuCard.astro";
                     </svg>
                 </a>
                 <h1
-                    class="text-xl uppercase tracking-[0.2em] font-bold text-white"
+                    class="text-xl uppercase tracking-[0.3em] font-bold text-white italic"
                 >
                     Getränkekarte
                 </h1>
@@ -40,27 +40,40 @@ import MenuCard from "../components/MenuCard.astro";
         </header>
 
         <!-- Menu Content Holder -->
-        <div id="menu-container" class="py-12 px-6 max-w-4xl mx-auto">
+        <div
+            id="menu-container"
+            class="py-12 px-6 max-w-4xl mx-auto min-h-[60vh]"
+        >
             <div
-                class="flex flex-col items-center justify-center py-20 animate-pulse"
+                class="flex flex-col items-center justify-center py-32 animate-pulse"
             >
                 <div
-                    class="w-12 h-12 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"
+                    class="w-12 h-12 border-2 border-secondary/20 border-t-secondary rounded-full animate-spin mb-6"
                 >
                 </div>
-                <p class="text-xs text-gray-500 uppercase tracking-widest">
-                    Lade Karte...
+                <p
+                    class="text-[10px] text-gray-500 uppercase tracking-[0.4em] font-medium"
+                >
+                    Lade Menü...
                 </p>
             </div>
         </div>
 
-        <div class="pb-12 text-center border-t border-white/5 mt-12">
+        <!-- Footer -->
+        <footer
+            class="pb-20 text-center border-t border-white/5 mt-12 bg-gradient-to-b from-black to-[#050505]"
+        >
             <p
-                class="text-[10px] text-gray-600 uppercase tracking-[0.3em] py-8"
+                class="text-[9px] text-gray-600 uppercase tracking-[0.5em] py-12 font-medium"
             >
-                Café Caruso &copy; 2024 &bull; Geislingen an der Steige
+                Café Caruso &bull; Geislingen &bull; Seit 1989
             </p>
-        </div>
+            <div class="flex justify-center gap-2 pb-8 opacity-20">
+                <div class="w-1 h-1 bg-secondary rounded-full"></div>
+                <div class="w-1 h-1 bg-secondary rounded-full"></div>
+                <div class="w-1 h-1 bg-secondary rounded-full"></div>
+            </div>
+        </footer>
     </main>
 </Layout>
 
@@ -77,58 +90,143 @@ import MenuCard from "../components/MenuCard.astro";
             if (contentType && contentType.includes("application/json")) {
                 data = await res.json();
             } else {
-                throw new Error("No JSON response (Local Dev)");
+                throw new Error("No JSON response (likely Local Dev)");
             }
 
             if (!Array.isArray(data) || data.length === 0) {
-                renderMockFallback(container);
+                renderMenuFromCacheOrMock(container);
                 return;
             }
 
             renderMenu(container, data);
-            // Save to cache for local dev fallback
             localStorage.setItem("caruso_menu_cache", JSON.stringify(data));
         } catch (err) {
-            console.warn("API Fetch failed, checking cache...", err);
-            const cached = localStorage.getItem("caruso_menu_cache");
-            if (cached) {
-                renderMenu(container, JSON.parse(cached));
-            } else {
-                renderMockFallback(container);
-            }
+            console.warn("Backend Fetch failed, using fallback.", err);
+            renderMenuFromCacheOrMock(container);
+        }
+    }
+
+    function renderMenuFromCacheOrMock(container: HTMLElement) {
+        const cached = localStorage.getItem("caruso_menu_cache");
+        if (cached) {
+            renderMenu(container, JSON.parse(cached));
+        } else {
+            // High-Quality Mock Data with Caruso Flair
+            const mockData = [
+                {
+                    name: "Caruso Specials",
+                    is_special: true,
+                    bg_color: "#ffe08a",
+                    items: [
+                        {
+                            name: "Caruso Spritz",
+                            price: 7.5,
+                            unit: "0,3l",
+                            info: "Limoncello, Prosecco, Soda, Minze",
+                        },
+                        {
+                            name: "Pink Gin Tonic",
+                            price: 9.5,
+                            unit: "0,4l",
+                            info: "Gordon's Pink, Schweppes Tonic, Beeren",
+                        },
+                    ],
+                },
+                {
+                    name: "Alkoholfrei",
+                    is_special: false,
+                    items: [
+                        {
+                            name: "Hausgemachte Eistee",
+                            price: 4.9,
+                            unit: "0,4l",
+                            info: "Zitrone-Minze oder Pfirsich",
+                        },
+                        {
+                            name: "San Pellegrino",
+                            price: 3.5,
+                            unit: "0,25l",
+                            info: "Feinperliges Mineralwasser",
+                        },
+                    ],
+                },
+            ];
+            renderMenu(container, mockData);
         }
     }
 
     function renderMenu(container: HTMLElement, data: any[]) {
         container.innerHTML = "";
-        data.forEach((category) => {
-            const section = document.createElement("div");
-            section.className = "mb-16 animate-fade-in";
 
-            let itemsHtml = "";
+        data.forEach((category, catIdx) => {
+            const isSpecial = !!category.is_special;
+            const bgColor = category.bg_color || "#ffe08a";
+
+            const section = document.createElement("div");
+            section.className =
+                "category-section mb-16 last:mb-0 transition-all duration-700 opacity-0 transform translate-y-8";
+            section.style.animationDelay = catIdx * 0.15 + "s";
+
+            if (isSpecial) {
+                section.classList.add(
+                    "special-category",
+                    "p-8",
+                    "border-l-4",
+                    "border-secondary",
+                    "rounded-r-2xl"
+                );
+                section.style.backgroundColor = bgColor + "08";
+                section.style.borderColor = bgColor;
+            }
+
+            // Category Header
+            let headerHtml =
+                '<div class="flex items-center gap-6 mb-10">' +
+                '<h2 class="text-2xl md:text-4xl font-bold uppercase tracking-tighter italic ' +
+                (isSpecial ? "text-secondary" : "text-white") +
+                '">' +
+                category.name +
+                "</h2>" +
+                (isSpecial
+                    ? '<span class="bg-secondary text-black text-[9px] font-black uppercase py-1 px-3 tracking-[0.2em] rounded-sm animate-pulse">Special</span>'
+                    : "") +
+                '<div class="h-[1px] flex-grow ' +
+                (isSpecial ? "bg-secondary/20" : "bg-white/10") +
+                '"></div>' +
+                "</div>";
+
+            // Items Grid
+            let itemsHtml =
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">';
             if (category.items && Array.isArray(category.items)) {
-                itemsHtml = category.items
+                itemsHtml += category.items
                     .map((item: any) => {
-                        const price =
+                        const priceNum =
                             typeof item.price === "number"
-                                ? item.price.toFixed(2)
-                                : parseFloat(item.price).toFixed(2);
+                                ? item.price
+                                : parseFloat(item.price);
+                        const formattedPrice = priceNum
+                            .toFixed(2)
+                            .replace(".", ",");
+
                         return (
-                            '<div class="group">' +
-                            '<div class="flex justify-between items-baseline mb-2">' +
-                            '<h3 class="text-white font-bold tracking-wide uppercase text-sm group-hover:text-secondary transition-colors italic">' +
+                            '<div class="menu-item group flex flex-col gap-1 py-4 border-b border-white/[0.03] last:border-0 hover:bg-white/[0.01] transition-all duration-300 rounded-lg">' +
+                            '<div class="flex justify-between items-baseline gap-4">' +
+                            '<h3 class="text-white text-base md:text-lg font-bold group-hover:text-secondary transition-colors uppercase tracking-wider italic">' +
                             item.name +
                             "</h3>" +
-                            '<div class="flex-grow border-b border-dotted border-white/10 mx-4"></div>' +
-                            '<span class="text-secondary font-bold text-sm tracking-tighter">' +
-                            price +
-                            "€</span>" +
-                            "</div>" +
-                            '<div class="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest">' +
+                            '<div class="flex items-baseline gap-0.5 text-secondary font-black whitespace-nowrap">' +
                             "<span>" +
+                            formattedPrice +
+                            "</span>" +
+                            '<span class="text-[10px] ml-0.5">€</span>' +
+                            "</div>" +
+                            "</div>" +
+                            '<div class="flex justify-between items-center text-[10px] text-gray-500 font-medium tracking-wide">' +
+                            '<span class="italic opacity-70">' +
                             (item.info || "") +
                             "</span>" +
-                            "<span>" +
+                            '<span class="uppercase tracking-widest text-[9px] opacity-40">' +
                             (item.unit || "") +
                             "</span>" +
                             "</div>" +
@@ -137,73 +235,64 @@ import MenuCard from "../components/MenuCard.astro";
                     })
                     .join("");
             }
+            itemsHtml += "</div>";
 
-            const isSpecial = !!category.is_special;
-            const specialBadge = isSpecial
-                ? '<span class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest rounded-full border border-secondary/20 animate-pulse">Special</span>'
-                : "";
-            const bgColor = category.bg_color || "#ffe08a";
-            const titleColor = isSpecial ? bgColor : "#fff";
-
-            section.innerHTML =
-                '<div class="mb-10 flex items-center gap-6">' +
-                '<h2 class="text-2xl md:text-3xl font-bold uppercase tracking-tighter italic border-l-4 pl-6" style="border-color: ' +
-                bgColor +
-                "; color: " +
-                titleColor +
-                '">' +
-                category.name +
-                "</h2>" +
-                specialBadge +
-                "</div>" +
-                '<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">' +
-                itemsHtml +
-                "</div>";
-
+            section.innerHTML = headerHtml + itemsHtml;
             container.appendChild(section);
+
+            // Trigger animation
+            setTimeout(() => {
+                section.classList.remove("opacity-0", "translate-y-8");
+                section.classList.add("opacity-100", "translate-y-0");
+            }, 50);
         });
     }
 
-    function renderMockFallback(container: HTMLElement) {
-        const mockData = [
-            {
-                name: "Cocktails",
-                is_special: true,
-                bg_color: "#ffe08a",
-                items: [
-                    {
-                        name: "Sex on the Beach",
-                        price: 9.5,
-                        unit: "0,4l",
-                        info: "Wodka, Pfirsichlikör, Säfte",
-                    },
-                    {
-                        name: "Caipirinha",
-                        price: 8.9,
-                        unit: "0,4l",
-                        info: "Pitu, Limetten, Rohrzucker",
-                    },
-                ],
-            },
-        ];
-        renderMenu(container, mockData);
-    }
-
     loadMenu();
+
+    // Scroll Header Shadow
+    window.addEventListener("scroll", () => {
+        const header = document.getElementById("menu-header");
+        if (header) {
+            if (window.scrollY > 20) {
+                header.classList.add(
+                    "shadow-[0_10px_30px_rgba(0,0,0,0.8)]",
+                    "py-6"
+                );
+                header.classList.remove("py-12");
+            } else {
+                header.classList.remove(
+                    "shadow-[0_10px_30px_rgba(0,0,0,0.8)]",
+                    "py-6"
+                );
+                header.classList.add("py-12");
+            }
+        }
+    });
 </script>
 
 <style is:global>
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .special-category {
+        box-shadow: 0 20px 50px -20px rgba(255, 224, 138, 0.05);
     }
-    .animate-fade-in {
-        animation: fadeIn 0.8s ease-out forwards;
+
+    .menu-item {
+        position: relative;
+    }
+
+    .menu-item::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 0;
+        height: 1px;
+        background: linear-gradient(to right, #ffe08a, transparent);
+        transition: width 0.4s ease;
+        opacity: 0.3;
+    }
+
+    .menu-item:hover::after {
+        width: 100%;
     }
 </style>
