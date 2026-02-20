@@ -51,8 +51,15 @@ const MenuManager = () => {
 
     const fetchMenu = async () => {
         try {
-            const res = await fetch('/api/get-menu.php');
-            const contentType = res.headers.get("content-type");
+            // Priority 1: Primary PHP API
+            let res = await fetch('/api/get-menu.php');
+            let contentType = res.headers.get("content-type");
+
+            if (!contentType || !contentType.includes("application/json")) {
+                // Priority 2: Local Dev Bridge (static JSON)
+                res = await fetch('/api/menu.json');
+                contentType = res.headers.get("content-type");
+            }
 
             if (contentType && contentType.includes("application/json")) {
                 const data = await res.json();

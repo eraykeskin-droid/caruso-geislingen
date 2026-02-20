@@ -83,14 +83,21 @@ import Layout from "../layouts/Layout.astro";
         if (!container) return;
 
         try {
-            const res = await fetch("/api/get-menu.php");
-            const contentType = res.headers.get("content-type");
+            // Priority 1: Backend API
+            let res = await fetch("/api/get-menu.php");
+            let contentType = res.headers.get("content-type");
+
+            if (!contentType || !contentType.includes("application/json")) {
+                // Priority 2: Static JSON Bridge (for local development)
+                res = await fetch("/api/menu.json");
+                contentType = res.headers.get("content-type");
+            }
 
             let data;
             if (contentType && contentType.includes("application/json")) {
                 data = await res.json();
             } else {
-                throw new Error("No JSON response (likely Local Dev)");
+                throw new Error("No JSON response");
             }
 
             if (!Array.isArray(data) || data.length === 0) {
