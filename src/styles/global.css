@@ -7,6 +7,10 @@
 }
 
 @layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
     @apply bg-black text-white font-sans antialiased;
   }
