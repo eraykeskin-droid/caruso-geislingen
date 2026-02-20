@@ -407,7 +407,7 @@ const SortableCategory = ({
                         <span className={`text-xl font-bold uppercase tracking-tight ${category.is_special ? 'text-secondary' : 'text-white'}`}>
                             {category.name}
                         </span>
-                        {category.is_special && <Star size={14} className="text-secondary fill-secondary animate-pulse" />}
+                        {!!category.is_special && <Star size={14} className="text-secondary fill-secondary animate-pulse" />}
                     </div>
 
                     <div className="flex items-center gap-3">
