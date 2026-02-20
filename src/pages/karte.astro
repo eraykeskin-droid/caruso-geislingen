@@ -41,14 +41,23 @@ import MenuCard from "../components/MenuCard.astro";
 
         <!-- Menu Content Holder -->
         <div id="menu-container" class="py-12 px-6 max-w-4xl mx-auto">
-            <div class="flex flex-col items-center justify-center py-20 animate-pulse">
-                <div class="w-12 h-12 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"></div>
-                <p class="text-xs text-gray-500 uppercase tracking-widest">Lade Karte...</p>
+            <div
+                class="flex flex-col items-center justify-center py-20 animate-pulse"
+            >
+                <div
+                    class="w-12 h-12 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"
+                >
+                </div>
+                <p class="text-xs text-gray-500 uppercase tracking-widest">
+                    Lade Karte...
+                </p>
             </div>
         </div>
 
         <div class="pb-12 text-center border-t border-white/5 mt-12">
-            <p class="text-[10px] text-gray-600 uppercase tracking-[0.3em] py-8">
+            <p
+                class="text-[10px] text-gray-600 uppercase tracking-[0.3em] py-8"
+            >
                 Café Caruso &copy; 2024 &bull; Geislingen an der Steige
             </p>
         </div>
@@ -57,13 +66,13 @@ import MenuCard from "../components/MenuCard.astro";
 
 <script>
     async function loadMenu() {
-        const container = document.getElementById('menu-container');
+        const container = document.getElementById("menu-container");
         if (!container) return;
 
         try {
-            const res = await fetch('/api/get-menu.php');
+            const res = await fetch("/api/get-menu.php");
             const contentType = res.headers.get("content-type");
-            
+
             let data;
             if (contentType && contentType.includes("application/json")) {
                 data = await res.json();
@@ -78,11 +87,10 @@ import MenuCard from "../components/MenuCard.astro";
 
             renderMenu(container, data);
             // Save to cache for local dev fallback
-            localStorage.setItem('caruso_menu_cache', JSON.stringify(data));
-
+            localStorage.setItem("caruso_menu_cache", JSON.stringify(data));
         } catch (err) {
-            console.warn('API Fetch failed, checking cache...', err);
-            const cached = localStorage.getItem('caruso_menu_cache');
+            console.warn("API Fetch failed, checking cache...", err);
+            const cached = localStorage.getItem("caruso_menu_cache");
             if (cached) {
                 renderMenu(container, JSON.parse(cached));
             } else {
@@ -92,36 +100,66 @@ import MenuCard from "../components/MenuCard.astro";
     }
 
     function renderMenu(container: HTMLElement, data: any[]) {
-        container.innerHTML = '';
+        container.innerHTML = "";
         data.forEach((category) => {
-            const section = document.createElement('div');
+            const section = document.createElement("div");
             section.className = "mb-16 animate-fade-in";
-            
-            section.innerHTML = `
-                <div class="mb-10 flex items-center gap-6">
-                    <h2 class="text-2xl md:text-3xl font-bold uppercase tracking-tighter italic border-l-4 pl-6" style="border-color: ${category.bg_color || '#ffe08a'}; color: ${category.is_special ? (category.bg_color || '#ffe08a') : '#fff'}">
-                        ${category.name}
-                    </h2>
-                    ${category.is_special ? '<span class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest rounded-full border border-secondary/20 animate-pulse">Special</span>' : ''}
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                    ${(category.items || []).map((item: any) => \`
-                        <div class="group">
-                            <div class="flex justify-between items-baseline mb-2">
-                                <h3 class="text-white font-bold tracking-wide uppercase text-sm group-hover:text-secondary transition-colors italic">
-                                    \${item.name}
-                                </h3>
-                                <div class="flex-grow border-b border-dotted border-white/10 mx-4"></div>
-                                <span class="text-secondary font-bold text-sm tracking-tighter">\${typeof item.price === 'number' ? item.price.toFixed(2) : parseFloat(item.price).toFixed(2)}€</span>
-                            </div>
-                            <div class="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest">
-                                <span>\${item.info || ''}</span>
-                                <span>\${item.unit || ''}</span>
-                            </div>
-                        </div>
-                    \`).join('')}
-                </div>
-            \`;
+
+            let itemsHtml = "";
+            if (category.items && Array.isArray(category.items)) {
+                itemsHtml = category.items
+                    .map((item: any) => {
+                        const price =
+                            typeof item.price === "number"
+                                ? item.price.toFixed(2)
+                                : parseFloat(item.price).toFixed(2);
+                        return (
+                            '<div class="group">' +
+                            '<div class="flex justify-between items-baseline mb-2">' +
+                            '<h3 class="text-white font-bold tracking-wide uppercase text-sm group-hover:text-secondary transition-colors italic">' +
+                            item.name +
+                            "</h3>" +
+                            '<div class="flex-grow border-b border-dotted border-white/10 mx-4"></div>' +
+                            '<span class="text-secondary font-bold text-sm tracking-tighter">' +
+                            price +
+                            "€</span>" +
+                            "</div>" +
+                            '<div class="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest">' +
+                            "<span>" +
+                            (item.info || "") +
+                            "</span>" +
+                            "<span>" +
+                            (item.unit || "") +
+                            "</span>" +
+                            "</div>" +
+                            "</div>"
+                        );
+                    })
+                    .join("");
+            }
+
+            const isSpecial = !!category.is_special;
+            const specialBadge = isSpecial
+                ? '<span class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-widest rounded-full border border-secondary/20 animate-pulse">Special</span>'
+                : "";
+            const bgColor = category.bg_color || "#ffe08a";
+            const titleColor = isSpecial ? bgColor : "#fff";
+
+            section.innerHTML =
+                '<div class="mb-10 flex items-center gap-6">' +
+                '<h2 class="text-2xl md:text-3xl font-bold uppercase tracking-tighter italic border-l-4 pl-6" style="border-color: ' +
+                bgColor +
+                "; color: " +
+                titleColor +
+                '">' +
+                category.name +
+                "</h2>" +
+                specialBadge +
+                "</div>" +
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">' +
+                itemsHtml +
+                "</div>";
+
             container.appendChild(section);
         });
     }
@@ -133,10 +171,20 @@ import MenuCard from "../components/MenuCard.astro";
                 is_special: true,
                 bg_color: "#ffe08a",
                 items: [
-                    { name: "Sex on the Beach", price: 9.5, unit: "0,4l", info: "Wodka, Pfirsichlikör, Säfte" },
-                    { name: "Caipirinha", price: 8.9, unit: "0,4l", info: "Pitu, Limetten, Rohrzucker" }
-                ]
-            }
+                    {
+                        name: "Sex on the Beach",
+                        price: 9.5,
+                        unit: "0,4l",
+                        info: "Wodka, Pfirsichlikör, Säfte",
+                    },
+                    {
+                        name: "Caipirinha",
+                        price: 8.9,
+                        unit: "0,4l",
+                        info: "Pitu, Limetten, Rohrzucker",
+                    },
+                ],
+            },
         ];
         renderMenu(container, mockData);
     }
@@ -146,8 +194,14 @@ import MenuCard from "../components/MenuCard.astro";
 
 <style is:global>
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     .animate-fade-in {
         animation: fadeIn 0.8s ease-out forwards;
