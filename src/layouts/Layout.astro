@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import BackToTop from "../components/BackToTop.astro";
+import CookieBanner from "../components/CookieBanner.astro";
 
 interface Props {
 	title: string;
@@ -27,7 +29,7 @@ const {
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 
-		<!-- Fonts - Locally loaded would be better, but for now we setup the structure -->
+		<!-- Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -44,9 +46,10 @@ const {
 		<script>
 			// Intercept all internal anchor links to keep the URL clean (remove #)
 			document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-				anchor.addEventListener("click", function (e) {
-					const href = this.getAttribute("href");
-					if (href === "#") return;
+				anchor.addEventListener("click", (e) => {
+					const target = e.currentTarget as HTMLAnchorElement;
+					const href = target.getAttribute("href");
+					if (!href || href === "#") return;
 
 					e.preventDefault();
 					const targetElement = document.querySelector(href);
@@ -58,8 +61,8 @@ const {
 
 						// Remove the hash from the URL without jumping
 						window.history.pushState(
-							null,
-							null,
+							{},
+							"",
 							window.location.pathname
 						);
 					}
