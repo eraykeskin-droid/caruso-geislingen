@@ -1,15 +1,18 @@
 ---
-import '../styles/global.css';
+import "../styles/global.css";
 
 interface Props {
 	title: string;
 	description?: string;
 }
 
-const { title, description = "Café Caruso – Shisha Bar & Lounge in Geislingen an der Steige" } = Astro.props;
+const {
+	title,
+	description = "Café Caruso – Shisha Bar & Lounge in Geislingen an der Steige",
+} = Astro.props;
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 	<head>
 		<meta charset="UTF-8" />
@@ -18,19 +21,48 @@ const { title, description = "Café Caruso – Shisha Bar & Lounge in Geislingen
 		<meta name="generator" content={Astro.generator} />
 		<title>{title} | Café Caruso</title>
 		<meta name="description" content={description} />
-		
+
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		
+
 		<!-- Fonts - Locally loaded would be better, but for now we setup the structure -->
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+			rel="stylesheet"
+		/>
 	</head>
 	<body>
 		<slot />
+
+		<script>
+			// Intercept all internal anchor links to keep the URL clean (remove #)
+			document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+				anchor.addEventListener("click", function (e) {
+					const href = this.getAttribute("href");
+					if (href === "#") return;
+
+					e.preventDefault();
+					const targetElement = document.querySelector(href);
+
+					if (targetElement) {
+						targetElement.scrollIntoView({
+							behavior: "smooth",
+						});
+
+						// Remove the hash from the URL without jumping
+						window.history.pushState(
+							null,
+							null,
+							window.location.pathname
+						);
+					}
+				});
+			});
+		</script>
 	</body>
 </html>
 
@@ -47,7 +79,7 @@ const { title, description = "Café Caruso – Shisha Bar & Lounge in Geislingen
 		);
 	}
 	html {
-		font-family: 'Inter', system-ui, sans-serif;
+		font-family: "Inter", system-ui, sans-serif;
 		background: #000;
 	}
 </style>
