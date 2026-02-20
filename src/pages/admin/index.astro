@@ -1,5 +1,13 @@
-import Layout from "../../layouts/Layout.astro"; import AdminAuth from
-"../../components/admin/AdminAuth"; import AdminDashboard from
-"../../components/admin/AdminDashboard"<Layout title="Admin Panel"> <AdminAuth
-client:only="react"> <AdminDashboard client:only="react" /> </AdminAuth>
-</Layout> <style></style>
+---
+import Layout from "../../layouts/Layout.astro";
+import AdminAuth from "../../components/admin/AdminAuth";
+import AdminDashboard from "../../components/admin/AdminDashboard";
+---
+
+<Layout title="Admin Panel">
+    <AdminAuth client:only="react">
+        <AdminDashboard client:only="react" />
+    </AdminAuth>
+</Layout>
+
+<style></style>
