@@ -111,42 +111,104 @@ import Layout from "../layouts/Layout.astro";
         if (cached) {
             renderMenu(container, JSON.parse(cached));
         } else {
-            // High-Quality Mock Data with Caruso Flair
+            // Extracted real data from the previous website
             const mockData = [
                 {
-                    name: "Caruso Specials",
+                    name: "Winterkarte: Specials",
                     is_special: true,
                     bg_color: "#ffe08a",
                     items: [
                         {
-                            name: "Caruso Spritz",
-                            price: 7.5,
-                            unit: "0,3l",
-                            info: "Limoncello, Prosecco, Soda, Minze",
+                            name: "Winter Mojito",
+                            price: 6.9,
+                            unit: "0,4l",
+                            info: "Limetten, Rohrzucker, Minze, Säfte",
                         },
                         {
-                            name: "Pink Gin Tonic",
-                            price: 9.5,
+                            name: "Orange Cinnamon Fizz",
+                            price: 5.9,
                             unit: "0,4l",
-                            info: "Gordon's Pink, Schweppes Tonic, Beeren",
+                            info: "Orangen, Zimt, Soda",
+                        },
+                        {
+                            name: "Cherry Cola Winter",
+                            price: 5.9,
+                            unit: "0,4l",
+                            info: "Kirscharoma, Cola, Winterliche Gewürze",
                         },
                     ],
                 },
                 {
-                    name: "Alkoholfrei",
+                    name: "Biere",
                     is_special: false,
                     items: [
                         {
-                            name: "Hausgemachte Eistee",
-                            price: 4.9,
-                            unit: "0,4l",
-                            info: "Zitrone-Minze oder Pfirsich",
+                            name: "Halbe",
+                            price: 3.9,
+                            unit: "0,5l",
+                            info: "Frisch vom Fass",
                         },
                         {
-                            name: "San Pellegrino",
-                            price: 3.5,
-                            unit: "0,25l",
-                            info: "Feinperliges Mineralwasser",
+                            name: "Hefeweizen",
+                            price: 3.9,
+                            unit: "0,5l",
+                            info: "",
+                        },
+                        { name: "Radler", price: 3.6, unit: "0,33l", info: "" },
+                        {
+                            name: "Corona / Desperados",
+                            price: 4.4,
+                            unit: "0,33l",
+                            info: "",
+                        },
+                    ],
+                },
+                {
+                    name: "Softdrinks",
+                    is_special: false,
+                    items: [
+                        {
+                            name: "Coca Cola / Zero",
+                            price: 4.2,
+                            unit: "0,33l",
+                            info: "",
+                        },
+                        {
+                            name: "Fanta / Sprite / Spezi",
+                            price: 4.2,
+                            unit: "0,33l",
+                            info: "",
+                        },
+                        {
+                            name: "Elephant Bay Eistee",
+                            price: 4.2,
+                            unit: "0,33l",
+                            info: "Verschiedene Sorten",
+                        },
+                    ],
+                },
+                {
+                    name: "Cocktails",
+                    is_special: true,
+                    bg_color: "#ffe08a",
+                    items: [
+                        {
+                            name: "Caipirinha",
+                            price: 7.9,
+                            unit: "0,4l",
+                            info: "Pitu, Rohrzucker, Limette",
+                        },
+                        {
+                            name: "Sex on the Beach",
+                            price: 7.9,
+                            unit: "0,4l",
+                            info: "Wodka, Pfirsichlikör, Säfte",
+                        },
+                        {
+                            name: "Mojito",
+                            price: 7.9,
+                            unit: "0,4l",
+                            info: "Rum, Minze, Limette",
                         },
                     ],
                 },
@@ -253,13 +315,13 @@ import Layout from "../layouts/Layout.astro";
     window.addEventListener("scroll", () => {
         const header = document.getElementById("menu-header");
         if (header) {
-            if (window.scrollY > 20) {
+            if (header.classList && window.scrollY > 20) {
                 header.classList.add(
                     "shadow-[0_10px_30px_rgba(0,0,0,0.8)]",
                     "py-6"
                 );
                 header.classList.remove("py-12");
-            } else {
+            } else if (header.classList) {
                 header.classList.remove(
                     "shadow-[0_10px_30px_rgba(0,0,0,0.8)]",
                     "py-6"

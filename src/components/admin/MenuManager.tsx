@@ -69,15 +69,36 @@ const MenuManager = () => {
             if (cached) {
                 setCategories(JSON.parse(cached));
             } else {
-                // Initial Default Data
+                // Initial Data extracted from caruso-geislingen.de
                 const defaultData = [
                     {
-                        id: 'cat-1',
+                        id: 'cat-wint',
+                        name: 'Winterkarte: Specials',
+                        is_special: true,
+                        bg_color: '#ffe08a',
+                        items: [
+                            { id: 'item-w1', name: 'Winter Mojito', price: 6.9, unit: '0,4l', info: 'Limetten, Rohrzucker, Minze, Säfte' },
+                            { id: 'item-w2', name: 'Orange Cinnamon Fizz', price: 5.9, unit: '0,4l', info: 'Orangen, Zimt, Soda' }
+                        ]
+                    },
+                    {
+                        id: 'cat-beer',
+                        name: 'Biere',
+                        is_special: false,
+                        bg_color: '#000000',
+                        items: [
+                            { id: 'item-b1', name: 'Halbe', price: 3.9, unit: '0,5l', info: 'Frisch vom Fass' },
+                            { id: 'item-b2', name: 'Hefeweizen', price: 3.9, unit: '0,5l', info: '' }
+                        ]
+                    },
+                    {
+                        id: 'cat-cock',
                         name: 'Cocktails',
                         is_special: true,
                         bg_color: '#ffe08a',
                         items: [
-                            { id: 'item-1', name: 'Sex on the Beach', price: 9.5, unit: '0,4l', info: 'Wodka, Pfirsich...' }
+                            { id: 'item-c1', name: 'Caipirinha', price: 7.9, unit: '0,4l', info: 'Pitu, Rohrzucker, Limette' },
+                            { id: 'item-c2', name: 'Sex on the Beach', price: 7.9, unit: '0,4l', info: 'Wodka, Pfirsichlikör, Säfte' }
                         ]
                     }
                 ];
