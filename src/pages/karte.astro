@@ -196,8 +196,7 @@ import Layout from "../layouts/Layout.astro";
                 "</div>";
 
             // Items Grid
-            let itemsHtml =
-                '<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">';
+            let itemsHtml = '<div class="grid grid-cols-1 gap-y-4">';
             if (category.items && Array.isArray(category.items)) {
                 itemsHtml += category.items
                     .map((item: any) => {
