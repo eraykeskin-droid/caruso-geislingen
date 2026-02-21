@@ -128,13 +128,13 @@ const MenuManager = () => {
                                 const newSubItems = arrayMove(sub.items, oldIndex, newIndex);
                                 return {
                                     ...cat,
-                                    subcategories: cat.subcategories?.map(s => 
+                                    subcategories: cat.subcategories?.map(s =>
                                         s.id === subId ? { ...s, items: newSubItems } : s
                                     )
                                 };
                             }
                         }
-                    } 
+                    }
                     // Drag within direct items
                     else {
                         const oldIndex = cat.items.findIndex(i => i.id === active.id);
@@ -153,21 +153,21 @@ const MenuManager = () => {
 
     const handleDropItem = (categoryId: string, fromSubId: string | null, toSubId: string | null, itemId: string) => {
         if (fromSubId === toSubId) return;
-        
+
         let item: MenuItem | undefined;
-        
+
         const newCategories = categories.map(cat => {
             if (cat.id === categoryId) {
                 // Find and remove item from source
                 let updatedCat = { ...cat };
-                
+
                 if (fromSubId) {
                     const fromSub = updatedCat.subcategories?.find(s => s.id === fromSubId);
                     if (fromSub) {
                         item = fromSub.items.find(i => i.id === itemId);
                         updatedCat = {
                             ...updatedCat,
-                            subcategories: updatedCat.subcategories?.map(s => 
+                            subcategories: updatedCat.subcategories?.map(s =>
                                 s.id === fromSubId ? { ...s, items: s.items.filter(i => i.id !== itemId) } : s
                             )
                         };
@@ -179,14 +179,14 @@ const MenuManager = () => {
                         items: updatedCat.items.filter(i => i.id !== itemId)
                     };
                 }
-                
+
                 // Add item to destination
                 if (item && toSubId) {
                     const toSub = updatedCat.subcategories?.find(s => s.id === toSubId);
                     if (toSub) {
                         updatedCat = {
                             ...updatedCat,
-                            subcategories: updatedCat.subcategories?.map(s => 
+                            subcategories: updatedCat.subcategories?.map(s =>
                                 s.id === toSubId ? { ...s, items: [...s.items, item!] } : s
                             )
                         };
@@ -197,12 +197,12 @@ const MenuManager = () => {
                         items: [...updatedCat.items, item]
                     };
                 }
-                
+
                 return updatedCat;
             }
             return cat;
         });
-        
+
         setCategories(newCategories);
         persistMenu(newCategories);
     };
@@ -222,26 +222,26 @@ const MenuManager = () => {
         } else if (type === 'subcategory' && parentId) {
             if (mode === 'add') {
                 const newSub: SubCategory = { ...data, id: `sub-${Date.now()}`, items: [] };
-                newCategories = newCategories.map(c => 
+                newCategories = newCategories.map(c =>
                     c.id === parentId ? { ...c, subcategories: [...(c.subcategories || []), newSub] } : c
                 );
             } else {
                 newCategories = newCategories.map(c =>
-                    c.id === parentId ? { 
-                        ...c, 
-                        subcategories: (c.subcategories || []).map(s => s.id === data.id ? { ...s, ...data } : s) 
+                    c.id === parentId ? {
+                        ...c,
+                        subcategories: (c.subcategories || []).map(s => s.id === data.id ? { ...s, ...data } : s)
                     } : c
                 );
             }
         } else if (type === 'item') {
             const selectedSubId = data.subcategory_id;
             const catId = grandParentId || parentId;
-            
+
             if (!catId) {
                 setModal(null);
                 return;
             }
-            
+
             if (selectedSubId) {
                 if (mode === 'add') {
                     const newItem: MenuItem = { ...data, id: `item-${Date.now()}` };
@@ -258,12 +258,12 @@ const MenuManager = () => {
                 } else {
                     newCategories = newCategories.map(c => {
                         if (c.id !== catId) return c;
-                        
+
                         let updatedSubcategories = (c.subcategories || []).map(s => ({
                             ...s,
                             items: s.items.filter(i => i.id !== data.id)
                         }));
-                        
+
                         updatedSubcategories = updatedSubcategories.map(s => {
                             if (s.id === selectedSubId) {
                                 const existingIndex = s.items.findIndex(i => i.id === data.id);
@@ -278,7 +278,7 @@ const MenuManager = () => {
                             }
                             return s;
                         });
-                        
+
                         return { ...c, subcategories: updatedSubcategories };
                     });
                 }
@@ -296,12 +296,12 @@ const MenuManager = () => {
                 } else {
                     newCategories = newCategories.map(c => {
                         if (c.id !== catId) return c;
-                        
+
                         let updatedSubcategories = (c.subcategories || []).map(s => ({
                             ...s,
                             items: s.items.filter(i => i.id !== data.id)
                         }));
-                        
+
                         const existingIndex = c.items.findIndex(i => i.id === data.id);
                         let updatedItems;
                         if (existingIndex >= 0) {
@@ -309,7 +309,7 @@ const MenuManager = () => {
                         } else {
                             updatedItems = [...c.items, { ...data }];
                         }
-                        
+
                         return { ...c, items: updatedItems, subcategories: updatedSubcategories };
                     });
                 }
@@ -569,7 +569,7 @@ const MenuManager = () => {
 const SortableCategory = ({
     category, onEdit, onDelete, onAddItem, onEditItem, onDeleteItem, onDragEndItem, onAddSubcategory, onEditSubcategory, onDeleteSubcategory, onEditSubItem, onDeleteSubItem, setModal
 }: {
-    category: Category, onEdit: () => void, onDelete: () => void, onAddItem: () => void, onEditItem: (i: MenuItem) => void, onDeleteItem: (id: string, subId?: string) => void, onDragEndItem: (catId: string) => (event: any) => void, onAddSubcategory: () => void, onEditSubcategory: (s: SubCategory) => void, onDeleteSubcategory: (subId: string) => void, onEditSubItem: (item: MenuItem, subId: string) => void, onDeleteSubItem: (itemId: string, subId: string) => void, setModal: (modal: any) => void
+    category: Category, onEdit: () => void, onDelete: () => void, onAddItem: () => void, onEditItem: (i: MenuItem) => void, onDeleteItem: (id: string, subId?: string) => void, onDragEndItem: (catId: string, subId?: string) => (event: any) => void, onAddSubcategory: () => void, onEditSubcategory: (s: SubCategory) => void, onDeleteSubcategory: (subId: string) => void, onEditSubItem: (item: MenuItem, subId: string) => void, onDeleteSubItem: (itemId: string, subId: string) => void, setModal: (modal: any) => void
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: category.id });
 
@@ -647,7 +647,6 @@ const SortableCategory = ({
                                 key={sub.id}
                                 subcategory={sub}
                                 categoryId={category.id}
-                                subcategories={category.subcategories || []}
                                 onEdit={() => onEditSubcategory(sub)}
                                 onDelete={() => onDeleteSubcategory(sub.id)}
                                 onAddItems={() => setModal({ type: 'item', mode: 'add', data: { name: '', price: 0, unit: '', info: '', allergens: '', subcategory_id: sub.id }, parentId: sub.id, grandParentId: category.id, subcategories: category.subcategories || [] })}
@@ -664,10 +663,10 @@ const SortableCategory = ({
                         <SortableContext items={category.items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                             <div className="flex flex-col gap-2">
                                 {category.items.map(item => (
-                                    <SortableItem 
-                                        key={item.id} 
-                                        item={item} 
-                                        onEdit={() => onEditItem(item)} 
+                                    <SortableItem
+                                        key={item.id}
+                                        item={item}
+                                        onEdit={() => onEditItem(item)}
                                         onDelete={() => onDeleteItem(item.id)}
                                     />
                                 ))}
@@ -712,10 +711,10 @@ const SubCategoryBox = ({ subcategory, categoryId, onEdit, onDelete, onAddItems,
                     <SortableContext items={subcategory.items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                         <div className="flex flex-col gap-2">
                             {subcategory.items.map(item => (
-                                <SortableItem 
-                                    key={item.id} 
-                                    item={item} 
-                                    onEdit={() => onEditItem(item)} 
+                                <SortableItem
+                                    key={item.id}
+                                    item={item}
+                                    onEdit={() => onEditItem(item)}
                                     onDelete={() => onDeleteItem(item.id)}
                                 />
                             ))}
@@ -729,7 +728,7 @@ const SubCategoryBox = ({ subcategory, categoryId, onEdit, onDelete, onAddItems,
     );
 };
 
-const SortableItem = ({ item, onEdit, onDelete }: { 
+const SortableItem = ({ item, onEdit, onDelete }: {
     item: MenuItem, onEdit: () => void, onDelete: () => void
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });

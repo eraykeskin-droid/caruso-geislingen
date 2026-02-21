@@ -57,7 +57,7 @@ const WebsiteManager = () => {
     const [contact, setContact] = useState<ContactInfo>(defaultContact);
     const [editingDay, setEditingDay] = useState<number | null>(null);
     const [editingImage, setEditingImage] = useState<string | null>(null);
-    const [editingContact, setEditingContact] = useState(false);
+    const [editingContactField, setEditingContactField] = useState<keyof ContactInfo | null>(null);
     const [saving, setSaving] = useState(false);
 
     // Load from localStorage
@@ -94,6 +94,14 @@ const WebsiteManager = () => {
         updated[index] = { ...updated[index], hours };
         saveDays(updated);
         setEditingDay(null);
+    };
+
+    const updateContactField = (field: keyof ContactInfo, value: string) => {
+        const updated = { ...contact, [field]: value };
+        setContact(updated);
+        localStorage.setItem('caruso_contact_info', JSON.stringify(updated));
+        flashSave();
+        setEditingContactField(null);
     };
 
     const updateImageAlt = (id: string, alt: string) => {
@@ -157,149 +165,137 @@ const WebsiteManager = () => {
                 </div>
             )}
 
-            {/* Opening Hours */}
-            <section>
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
-                        <Clock size={18} className="text-secondary" />
-                        Öffnungszeiten
-                    </h2>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
+                {/* Opening Hours */}
+                <section>
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
+                            <Clock size={18} className="text-secondary" />
+                            Öffnungszeiten
+                        </h2>
+                    </div>
 
-                <div className="max-w-lg space-y-1">
-                    {days.map((day, index) => (
-                        <div
-                            key={day.name}
-                            className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/5 group hover:border-secondary/20 transition-all"
-                        >
-                            <span className="text-xs uppercase tracking-widest text-white font-bold w-32">
-                                {day.name}
-                            </span>
+                    <div className="space-y-1">
+                        {days.map((day, index) => (
+                            <div
+                                key={day.name}
+                                className="flex items-center justify-between p-3 h-[64px] bg-white/[0.03] border border-white/5 group hover:border-secondary/20 transition-all"
+                            >
+                                <span className="text-xs uppercase tracking-widest text-white font-bold w-24 md:w-32 shrink-0">
+                                    {day.name}
+                                </span>
 
-                            {editingDay === index ? (
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        const input = e.currentTarget.querySelector('input') as HTMLInputElement;
-                                        updateDay(index, input.value);
-                                    }}
-                                    className="flex items-center gap-2"
-                                >
-                                    <input
-                                        type="text"
-                                        defaultValue={day.hours}
-                                        autoFocus
-                                        className="bg-black border border-white/10 rounded-none px-3 py-1 text-white text-xs outline-none focus:border-secondary w-44"
-                                    />
-                                    <button type="submit" className="text-green-400 hover:text-green-300">
-                                        <Save size={14} />
-                                    </button>
-                                    <button type="button" onClick={() => setEditingDay(null)} className="text-gray-500 hover:text-white">
-                                        <X size={14} />
-                                    </button>
-                                </form>
-                            ) : (
-                                <div className="flex items-center gap-3">
-                                    <span className="text-xs text-gray-400">{day.hours}</span>
-                                    <button
-                                        onClick={() => setEditingDay(index)}
-                                        className="p-1 text-gray-600 hover:text-secondary transition-colors opacity-0 group-hover:opacity-100"
+                                {editingDay === index ? (
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const input = e.currentTarget.querySelector('input') as HTMLInputElement;
+                                            updateDay(index, input.value);
+                                        }}
+                                        className="flex items-center gap-2 flex-grow justify-end"
                                     >
-                                        <Edit2 size={12} />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Contact Info */}
-            <section>
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
-                        <MapPin size={18} className="text-secondary" />
-                        Kontakt & Adresse
-                    </h2>
-                    {!editingContact && (
-                        <button
-                            onClick={() => setEditingContact(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest hover:border-secondary/30 hover:text-secondary transition-all rounded-none"
-                        >
-                            <Edit2 size={14} /> Bearbeiten
-                        </button>
-                    )}
-                </div>
-
-                {editingContact ? (
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            const form = e.currentTarget;
-                            const updated: ContactInfo = {
-                                name: (form.querySelector('[name="cname"]') as HTMLInputElement).value,
-                                street: (form.querySelector('[name="street"]') as HTMLInputElement).value,
-                                city: (form.querySelector('[name="city"]') as HTMLInputElement).value,
-                                phone: (form.querySelector('[name="phone"]') as HTMLInputElement).value,
-                                email: (form.querySelector('[name="email"]') as HTMLInputElement).value,
-                                instagram: (form.querySelector('[name="instagram"]') as HTMLInputElement).value,
-                            };
-                            setContact(updated);
-                            localStorage.setItem('caruso_contact_info', JSON.stringify(updated));
-                            flashSave();
-                            setEditingContact(false);
-                        }}
-                        className="max-w-lg space-y-3"
-                    >
-                        {[
-                            { name: 'cname', label: 'Name', value: contact.name, icon: <MapPin size={14} className="text-secondary" /> },
-                            { name: 'street', label: 'Straße', value: contact.street, icon: <MapPin size={14} className="text-secondary" /> },
-                            { name: 'city', label: 'Stadt / PLZ', value: contact.city, icon: <MapPin size={14} className="text-secondary" /> },
-                            { name: 'phone', label: 'Telefon', value: contact.phone, icon: <Phone size={14} className="text-secondary" /> },
-                            { name: 'email', label: 'E-Mail', value: contact.email, icon: <Mail size={14} className="text-secondary" /> },
-                            { name: 'instagram', label: 'Instagram', value: contact.instagram, icon: <AtSign size={14} className="text-secondary" /> },
-                        ].map((field) => (
-                            <div key={field.name} className="flex items-center gap-3 p-3 bg-white/[0.03] border border-white/5">
-                                {field.icon}
-                                <div className="flex-1">
-                                    <label className="text-[9px] uppercase tracking-widest text-gray-600 font-bold block mb-1">{field.label}</label>
-                                    <input
-                                        name={field.name}
-                                        type="text"
-                                        defaultValue={field.value}
-                                        className="w-full bg-black border border-white/10 rounded-none px-3 py-1.5 text-white text-xs outline-none focus:border-secondary"
-                                    />
-                                </div>
-                            </div>
-                        ))}
-                        <div className="flex gap-3 pt-2">
-                            <button type="submit" className="flex items-center gap-2 px-6 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors">
-                                <Save size={14} /> Speichern
-                            </button>
-                            <button type="button" onClick={() => setEditingContact(false)} className="px-6 py-2 bg-white/5 text-white text-[10px] font-bold uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-colors">
-                                Abbrechen
-                            </button>
-                        </div>
-                    </form>
-                ) : (
-                    <div className="max-w-lg space-y-1">
-                        {[
-                            { label: 'Name', value: contact.name, icon: <MapPin size={14} className="text-secondary" /> },
-                            { label: 'Straße', value: contact.street, icon: <MapPin size={14} className="text-secondary" /> },
-                            { label: 'Stadt', value: contact.city, icon: <MapPin size={14} className="text-secondary" /> },
-                            { label: 'Telefon', value: contact.phone, icon: <Phone size={14} className="text-secondary" /> },
-                            { label: 'E-Mail', value: contact.email, icon: <Mail size={14} className="text-secondary" /> },
-                            { label: 'Instagram', value: `@${contact.instagram}`, icon: <AtSign size={14} className="text-secondary" /> },
-                        ].map((field) => (
-                            <div key={field.label} className="flex items-center gap-3 p-3 bg-white/[0.03] border border-white/5">
-                                {field.icon}
-                                <span className="text-xs text-gray-500 uppercase tracking-widest w-20 shrink-0">{field.label}</span>
-                                <span className="text-xs text-white">{field.value}</span>
+                                        <input
+                                            type="text"
+                                            defaultValue={day.hours}
+                                            autoFocus
+                                            className="bg-black/80 border-none rounded-none pl-4 pr-3 py-1.5 text-gray-400 text-xs outline-none focus:ring-0 w-full max-w-[180px] text-right"
+                                        />
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            <button type="submit" className="p-2 text-green-500/70 hover:text-green-400 -mr-1">
+                                                <Save size={18} />
+                                            </button>
+                                            <button type="button" onClick={() => setEditingDay(null)} className="p-2 text-gray-500 hover:text-white -mr-1">
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <div className="flex items-center gap-1 shrink-0 h-full">
+                                        <span className="text-xs text-gray-400 pl-4 py-1.5">{day.hours}</span>
+                                        <button
+                                            onClick={() => setEditingDay(index)}
+                                            className="p-2 text-gray-700 group-hover:text-secondary transition-colors opacity-40 group-hover:opacity-100 -mr-1"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
-                )}
-            </section>
+                </section>
+
+                {/* Contact Info */}
+                <section>
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
+                            <MapPin size={18} className="text-secondary" />
+                            Kontakt & Adresse
+                        </h2>
+                    </div>
+
+                    <div className="space-y-1">
+                        {[
+                            { key: 'name' as keyof ContactInfo, label: 'Name', value: contact.name, icon: <MapPin size={14} className="text-secondary" /> },
+                            { key: 'street' as keyof ContactInfo, label: 'Straße', value: contact.street, icon: <MapPin size={14} className="text-secondary" /> },
+                            { key: 'city' as keyof ContactInfo, label: 'Stadt', value: contact.city, icon: <MapPin size={14} className="text-secondary" /> },
+                            { key: 'phone' as keyof ContactInfo, label: 'Telefon', value: contact.phone, icon: <Phone size={14} className="text-secondary" /> },
+                            { key: 'email' as keyof ContactInfo, label: 'E-Mail', value: contact.email, icon: <Mail size={14} className="text-secondary" /> },
+                            { key: 'instagram' as keyof ContactInfo, label: 'Instagram', value: contact.instagram, icon: <AtSign size={14} className="text-secondary" /> },
+                        ].map((field) => (
+                            <div
+                                key={field.key}
+                                className="flex items-center justify-between p-3 h-[64px] bg-white/[0.03] border border-white/5 group hover:border-secondary/20 transition-all"
+                            >
+                                <div className="flex items-center gap-3 shrink-0">
+                                    <div className="w-5 flex justify-center text-secondary">
+                                        {field.icon}
+                                    </div>
+                                    <span className="text-xs uppercase tracking-widest text-white font-bold w-20 md:w-32 shrink-0">
+                                        {field.label}
+                                    </span>
+                                </div>
+
+                                {editingContactField === field.key ? (
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const input = e.currentTarget.querySelector('input') as HTMLInputElement;
+                                            updateContactField(field.key, input.value);
+                                        }}
+                                        className="flex items-center gap-2 flex-grow justify-end"
+                                    >
+                                        <input
+                                            type="text"
+                                            defaultValue={field.key === 'instagram' ? contact.instagram : field.value}
+                                            autoFocus
+                                            className="bg-black/80 border-none rounded-none pl-4 pr-3 py-1.5 text-gray-400 text-xs outline-none focus:ring-0 w-full text-right"
+                                        />
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            <button type="submit" className="p-2 text-green-500/70 hover:text-green-400 -mr-1">
+                                                <Save size={18} />
+                                            </button>
+                                            <button type="button" onClick={() => setEditingContactField(null)} className="p-2 text-gray-500 hover:text-white -mr-1">
+                                                <X size={18} />
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <div className="flex items-center gap-1 shrink-0 h-full">
+                                        <span className="text-xs text-gray-400 pl-4 py-1.5">{field.key === 'instagram' ? `@${contact.instagram}` : field.value}</span>
+                                        <button
+                                            onClick={() => setEditingContactField(field.key)}
+                                            className="p-2 text-gray-700 group-hover:text-secondary transition-colors opacity-40 group-hover:opacity-100 -mr-1"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            </div>
 
             {/* Gallery */}
             <section>
