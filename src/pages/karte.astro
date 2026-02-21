@@ -205,16 +205,16 @@ import Layout from "../layouts/Layout.astro";
             if (hasSubcategories) {
                 subcategories.forEach((sub: any) => {
                     itemsHtml += `
-                        <div class="mb-4">
-                            <h3 class="text-secondary text-xs font-black uppercase tracking-wider mb-2 inline-block bg-secondary/10 px-2 py-1">
+                        <div class="mb-6">
+                            <h3 class="text-secondary text-sm font-bold uppercase tracking-widest mb-3 border-b border-secondary/20 pb-2">
                                 ${sub.name}
                             </h3>
-                            <div class="flex flex-col gap-y-0 -mt-2">
+                            <div class="flex flex-col gap-y-0">
                     `;
                     
                     if (sub.items && Array.isArray(sub.items) && sub.items.length > 0) {
                         sub.items.forEach((item: any) => {
-                            itemsHtml += renderMenuItem(item, true);
+                            itemsHtml += renderMenuItem(item);
                         });
                     } else {
                         itemsHtml += '<p class="text-[10px] text-gray-500 italic py-2">Keine Artikel</p>';
@@ -223,9 +223,18 @@ import Layout from "../layouts/Layout.astro";
                     itemsHtml += `</div></div>`;
                 });
                 
-                directItems.forEach((item: any) => {
-                    itemsHtml += renderMenuItem(item);
-                });
+                if (directItems.length > 0) {
+                    itemsHtml += `
+                        <div class="mt-6">
+                            <h3 class="text-secondary text-sm font-bold uppercase tracking-widest mb-3 border-b border-secondary/20 pb-2">
+                                Weiteres
+                            </h3>
+                    `;
+                    directItems.forEach((item: any) => {
+                        itemsHtml += renderMenuItem(item);
+                    });
+                    itemsHtml += `</div>`;
+                }
             } else {
                 directItems.forEach((item: any) => {
                     itemsHtml += renderMenuItem(item);
@@ -275,7 +284,7 @@ import Layout from "../layouts/Layout.astro";
         }, data.length * 150 + 100);
     }
 
-    function renderMenuItem(item: any, withBackground = false) {
+    function renderMenuItem(item: any) {
         const priceNum =
             typeof item.price === "number"
                 ? item.price
@@ -284,11 +293,10 @@ import Layout from "../layouts/Layout.astro";
             .toFixed(2)
             .replace(".", ",");
 
-        const bgClass = withBackground ? "bg-white/[0.02] -mx-4 px-4" : "";
         const hasInfo = item.info || item.unit || item.allergens;
         const heightClass = hasInfo ? "py-4" : "py-2";
         const infoHtml = hasInfo ? `
-            <div class="flex justify-between items-center text-[11px] text-gray-300 font-medium tracking-wide mt-1">
+            <div class="flex justify-between items-center text-[10px] md:text-[11px] text-gray-300 font-medium tracking-wide mt-1">
                 <span class="opacity-90 flex items-center gap-2">
                     ${item.info || ""}
                     ${
@@ -297,16 +305,16 @@ import Layout from "../layouts/Layout.astro";
                             : ""
                     }
                 </span>
-                <span class="uppercase tracking-widest text-[10px] font-bold text-gray-400">${
+                <span class="uppercase tracking-widest text-[9px] md:text-[10px] font-bold text-gray-400">${
                     item.unit || ""
                 }</span>
             </div>
         ` : '';
 
         return `
-            <div class="menu-item group flex flex-col gap-1 ${heightClass} border-b border-white/[0.05] last:border-0 hover:bg-white/[0.01] transition-all duration-300 rounded-none ${bgClass}">
+            <div class="menu-item group flex flex-col gap-1 ${heightClass} border-b border-white/[0.05] last:border-0 hover:bg-white/[0.01] transition-all duration-300 rounded-none">
                 <div class="flex justify-between items-baseline gap-4">
-                    <h3 class="text-white text-base font-bold group-hover:text-secondary transition-colors uppercase tracking-wider flex items-center gap-3">
+                    <h3 class="text-white text-sm md:text-base font-bold group-hover:text-secondary transition-colors uppercase tracking-wider flex items-center gap-3">
                         ${item.name}
                     </h3>
                     <div class="flex items-baseline gap-0.5 text-secondary font-black whitespace-nowrap">
