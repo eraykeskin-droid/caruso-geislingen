@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Image, Trash2, Edit2, Plus, Save, X, MapPin, Phone, Mail, AtSign } from 'lucide-react';
+import { Clock, Image, Trash2, Edit2, Plus, Save, X, MapPin, Phone, Mail, AtSign, GripVertical } from 'lucide-react';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    rectSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface DayHours {
+    id?: number;
     name: string;
     hours: string;
 }
@@ -10,6 +29,7 @@ interface GalleryImage {
     id: string;
     src: string;
     alt: string;
+    description: string;
     span: string;
 }
 
@@ -42,14 +62,151 @@ const defaultDays: DayHours[] = [
 ];
 
 const defaultImages: GalleryImage[] = [
-    { id: "img-1", src: "/images/gallery-06.webp", alt: "Caruso Bar mit Premium-Spirituosen", span: "col-span-2" },
-    { id: "img-2", src: "/images/gallery-04.webp", alt: "Premium Shisha mit Cocktail", span: "" },
-    { id: "img-3", src: "/images/gallery-01.webp", alt: "Gemütliche Lounge-Ecke", span: "" },
-    { id: "img-4", src: "/images/gallery-03.webp", alt: "Speisen, Cocktails und Pizza", span: "col-span-2" },
-    { id: "img-5", src: "/images/gallery-05.webp", alt: "Handgefertigter Cocktail", span: "" },
-    { id: "img-6", src: "/images/gallery-02.webp", alt: "Chesterfield Lounge-Bereich", span: "" },
-    { id: "img-7", src: "/images/gallery-07.webp", alt: "Tropischer Cocktail mit Pizza", span: "" },
+    { id: "img-1", src: "/images/gallery/gallery-06.webp", alt: "Caruso Bar mit Premium-Spirituosen", description: "", span: "col-span-2" },
+    { id: "img-2", src: "/images/gallery/gallery-04.webp", alt: "Premium Shisha mit Cocktail", description: "", span: "" },
+    { id: "img-3", src: "/images/gallery/gallery-01.webp", alt: "Gemütliche Lounge-Ecke", description: "", span: "" },
+    { id: "img-4", src: "/images/gallery/gallery-03.webp", alt: "Speisen, Cocktails und Pizza", description: "", span: "col-span-2" },
+    { id: "img-5", src: "/images/gallery/gallery-05.webp", alt: "Handgefertigter Cocktail", description: "", span: "" },
+    { id: "img-6", src: "/images/gallery/gallery-02.webp", alt: "Chesterfield Lounge-Bereich", description: "", span: "" },
+    { id: "img-7", src: "/images/gallery/gallery-07.webp", alt: "Tropischer Cocktail mit Pizza", description: "", span: "" },
 ];
+
+// Sortable Image Item Component
+interface SortableImageProps {
+    img: GalleryImage;
+    onEdit: (id: string) => void;
+    onToggleSpan: (id: string) => void;
+    onDelete: (id: string) => void;
+    isEditing: boolean;
+    onEditMetadata: (id: string, alt: string, description: string) => void;
+    onCancelEdit: () => void;
+}
+
+const SortableGalleryImage = ({ img, onEdit, onToggleSpan, onDelete, isEditing, onEditMetadata, onCancelEdit }: SortableImageProps) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: img.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 20 : 1,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`relative group border border-white/5 hover:border-secondary/20 transition-all ${img.span} bg-black`}
+        >
+            <div className="relative overflow-hidden aspect-video md:aspect-auto md:h-40">
+                <img
+                    src={img.src}
+                    alt={img.alt}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23111" width="100" height="100"/><text x="50%" y="50%" fill="%23333" text-anchor="middle" dy=".3em" font-size="12">Bild fehlt</text></svg>';
+                    }}
+                />
+
+                {/* Drag Handle */}
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="absolute top-2 left-2 p-1.5 bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-30"
+                >
+                    <GripVertical size={14} />
+                </div>
+
+                {/* Overlay Controls */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-all flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => onEdit(img.id)}
+                            className="p-2 bg-white/10 text-white hover:bg-secondary hover:text-black transition-all"
+                            title="Alt-Text bearbeiten"
+                        >
+                            <Edit2 size={14} />
+                        </button>
+                        <button
+                            onClick={() => onToggleSpan(img.id)}
+                            className={`p-2 text-white transition-all ${img.span ? 'bg-secondary/30 hover:bg-secondary hover:text-black' : 'bg-white/10 hover:bg-white/20'}`}
+                            title={img.span ? "Normal (1 Spalte)" : "Breit (2 Spalten)"}
+                        >
+                            <span className="text-[10px] font-bold">{img.span ? "2x" : "1x"}</span>
+                        </button>
+                        <button
+                            onClick={() => onDelete(img.id)}
+                            className="p-2 bg-white/10 text-white hover:bg-red-500 transition-all"
+                            title="Bild löschen"
+                        >
+                            <Trash2 size={14} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Alt-Text Edit */}
+            {isEditing && (
+                <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center p-4 z-40 overflow-y-auto">
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.currentTarget);
+                            onEditMetadata(
+                                img.id,
+                                formData.get('alt') as string,
+                                formData.get('description') as string
+                            );
+                        }}
+                        className="w-full space-y-4"
+                    >
+                        <div className="space-y-1">
+                            <label className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">SEO Alt-Text</label>
+                            <input
+                                name="alt"
+                                type="text"
+                                defaultValue={img.alt}
+                                autoFocus
+                                className="w-full bg-black border border-white/10 rounded-none px-3 py-2 text-white text-xs outline-none focus:border-secondary"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Anzeige-Beschreibung</label>
+                            <input
+                                name="description"
+                                type="text"
+                                defaultValue={img.description}
+                                placeholder="Gefühlvoller Text für Frontend..."
+                                className="w-full bg-black border border-white/10 rounded-none px-3 py-2 text-white text-xs outline-none focus:border-secondary"
+                            />
+                        </div>
+                        <div className="flex gap-2 pt-2">
+                            <button type="submit" className="flex-1 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors">
+                                Speichern
+                            </button>
+                            <button type="button" onClick={onCancelEdit} className="flex-1 py-2 bg-white/5 text-white text-[10px] font-bold uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-colors">
+                                Abbrechen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* Info Bar */}
+            <div className="p-2 bg-black/60">
+                <p className="text-[9px] text-gray-400 truncate">{img.alt}</p>
+                <p className="text-[8px] text-gray-600 font-mono truncate">{img.src}</p>
+            </div>
+        </div>
+    );
+};
 
 const WebsiteManager = () => {
     const [days, setDays] = useState<DayHours[]>(defaultDays);
@@ -59,102 +216,197 @@ const WebsiteManager = () => {
     const [editingImage, setEditingImage] = useState<string | null>(null);
     const [editingContactField, setEditingContactField] = useState<keyof ContactInfo | null>(null);
     const [saving, setSaving] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    // Load from localStorage
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    // Fetch data from MySQL API
     useEffect(() => {
-        const savedDays = localStorage.getItem('caruso_opening_hours');
-        if (savedDays) setDays(JSON.parse(savedDays));
-
-        const savedImages = localStorage.getItem('caruso_gallery_images');
-        if (savedImages) setImages(JSON.parse(savedImages));
-
-        const savedContact = localStorage.getItem('caruso_contact_info');
-        if (savedContact) setContact(JSON.parse(savedContact));
+        const fetchData = async () => {
+            try {
+                const res = await fetch(`/api/get-website-data.php?t=${Date.now()}`);
+                const data = await res.json();
+                if (data.success) {
+                    if (data.days) setDays(data.days);
+                    if (data.images) setImages(data.images);
+                    if (data.contact) setContact(data.contact);
+                }
+            } catch (err) {
+                console.error('Error fetching website data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
     }, []);
-
-    const saveDays = (updated: DayHours[]) => {
-        setDays(updated);
-        localStorage.setItem('caruso_opening_hours', JSON.stringify(updated));
-        flashSave();
-    };
-
-    const saveImages = (updated: GalleryImage[]) => {
-        setImages(updated);
-        localStorage.setItem('caruso_gallery_images', JSON.stringify(updated));
-        flashSave();
-    };
 
     const flashSave = () => {
         setSaving(true);
         setTimeout(() => setSaving(false), 600);
     };
 
-    const updateDay = (index: number, hours: string) => {
-        const updated = [...days];
-        updated[index] = { ...updated[index], hours };
-        saveDays(updated);
+    const updateDay = async (index: number, hours: string) => {
+        const updatedDays = [...days];
+        updatedDays[index] = { ...updatedDays[index], hours };
+        setDays(updatedDays);
         setEditingDay(null);
+
+        try {
+            const res = await fetch('/api/save-website-data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'opening_hours', days: updatedDays })
+            });
+            const data = await res.json();
+            if (data.success) flashSave();
+        } catch (err) {
+            console.error('Save failed:', err);
+        }
     };
 
-    const updateContactField = (field: keyof ContactInfo, value: string) => {
-        const updated = { ...contact, [field]: value };
-        setContact(updated);
-        localStorage.setItem('caruso_contact_info', JSON.stringify(updated));
-        flashSave();
+    const updateContactField = async (field: keyof ContactInfo, value: string) => {
+        const updatedContact = { ...contact, [field]: value };
+        setContact(updatedContact);
         setEditingContactField(null);
+
+        try {
+            const res = await fetch('/api/save-website-data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'contact_info', contact: updatedContact })
+            });
+            const data = await res.json();
+            if (data.success) flashSave();
+        } catch (err) {
+            console.error('Save failed:', err);
+        }
     };
 
-    const updateImageAlt = (id: string, alt: string) => {
-        const updated = images.map(img => img.id === id ? { ...img, alt } : img);
-        saveImages(updated);
+    const updateImageMetadata = async (img: GalleryImage) => {
+        try {
+            const res = await fetch('/api/save-website-data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'update_image', image: img })
+            });
+            const data = await res.json();
+            if (data.success) flashSave();
+        } catch (err) {
+            console.error('Save failed:', err);
+        }
+    };
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = images.findIndex(img => img.id === active.id);
+            const newIndex = images.findIndex(img => img.id === over.id);
+
+            const updatedImages = arrayMove(images, oldIndex, newIndex);
+            setImages(updatedImages);
+
+            try {
+                const res = await fetch('/api/save-website-data.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'reorder_images',
+                        ids: updatedImages.map(img => img.id)
+                    })
+                });
+                const data = await res.json();
+                if (data.success) flashSave();
+            } catch (err) {
+                console.error('Reorder failed:', err);
+            }
+        }
+    };
+
+    const updateImageFields = (id: string, alt: string, description: string) => {
+        const updated = images.map(img => {
+            if (img.id === id) {
+                const newImg = { ...img, alt, description };
+                updateImageMetadata(newImg);
+                return newImg;
+            }
+            return img;
+        });
+        setImages(updated);
         setEditingImage(null);
     };
 
     const toggleImageSpan = (id: string) => {
-        const updated = images.map(img =>
-            img.id === id ? { ...img, span: img.span === "col-span-2" ? "" : "col-span-2" } : img
-        );
-        saveImages(updated);
+        const updated = images.map(img => {
+            if (img.id === id) {
+                const newImg = { ...img, span: img.span === "col-span-2" ? "" : "col-span-2" };
+                updateImageMetadata(newImg);
+                return newImg;
+            }
+            return img;
+        });
+        setImages(updated);
     };
 
-    const deleteImage = (id: string) => {
-        if (confirm('Bild wirklich aus der Galerie entfernen?')) {
-            saveImages(images.filter(img => img.id !== id));
+    const deleteImage = async (id: string) => {
+        if (!confirm('Bild wirklich aus der Galerie entfernen?')) return;
+
+        setImages(images.filter(img => img.id !== id));
+        try {
+            const res = await fetch('/api/save-website-data.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'delete_image', id })
+            });
+            const data = await res.json();
+            if (data.success) flashSave();
+        } catch (err) {
+            console.error('Delete failed:', err);
         }
     };
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
-        Array.from(files).forEach(file => {
-            if (!file.type.startsWith('image/')) return;
+        for (const file of Array.from(files)) {
+            if (!file.type.startsWith('image/')) continue;
 
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const dataUrl = ev.target?.result as string;
-                const alt = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-                const newImage: GalleryImage = {
-                    id: `img-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-                    src: dataUrl,
-                    alt,
-                    span: '',
-                };
-                setImages(prev => {
-                    const updated = [...prev, newImage];
-                    localStorage.setItem('caruso_gallery_images', JSON.stringify(updated));
-                    return updated;
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('alt', file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+
+            try {
+                const res = await fetch('/api/upload-gallery-image.php', {
+                    method: 'POST',
+                    body: formData
                 });
-                flashSave();
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // Reset input so same file can be re-uploaded
+                const data = await res.json();
+                if (data.success) {
+                    setImages(prev => [...prev, data.image]);
+                    flashSave();
+                }
+            } catch (err) {
+                console.error('Upload failed:', err);
+            }
+        }
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center p-12 h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="relative space-y-12">
@@ -322,86 +574,31 @@ const WebsiteManager = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {images.map((img) => (
-                        <div
-                            key={img.id}
-                            className={`relative group border border-white/5 hover:border-secondary/20 transition-all ${img.span}`}
-                        >
-                            <img
-                                src={img.src}
-                                alt={img.alt}
-                                className="w-full h-40 object-cover"
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23111" width="100" height="100"/><text x="50%" y="50%" fill="%23333" text-anchor="middle" dy=".3em" font-size="12">Bild fehlt</text></svg>';
-                                }}
-                            />
-
-                            {/* Overlay Controls */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-all flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setEditingImage(img.id)}
-                                        className="p-2 bg-white/10 text-white hover:bg-secondary hover:text-black transition-all"
-                                        title="Alt-Text bearbeiten"
-                                    >
-                                        <Edit2 size={14} />
-                                    </button>
-                                    <button
-                                        onClick={() => toggleImageSpan(img.id)}
-                                        className={`p-2 text-white transition-all ${img.span ? 'bg-secondary/30 hover:bg-secondary hover:text-black' : 'bg-white/10 hover:bg-white/20'}`}
-                                        title={img.span ? "Normal (1 Spalte)" : "Breit (2 Spalten)"}
-                                    >
-                                        <span className="text-[10px] font-bold">{img.span ? "2x" : "1x"}</span>
-                                    </button>
-                                    <button
-                                        onClick={() => deleteImage(img.id)}
-                                        className="p-2 bg-white/10 text-white hover:bg-red-500 transition-all"
-                                        title="Bild löschen"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Alt-Text Edit */}
-                            {editingImage === img.id && (
-                                <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-4 z-10">
-                                    <form
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            const input = e.currentTarget.querySelector('input') as HTMLInputElement;
-                                            updateImageAlt(img.id, input.value);
-                                        }}
-                                        className="w-full space-y-3"
-                                    >
-                                        <label className="text-[9px] uppercase tracking-widest text-gray-500 font-bold">Alt-Text</label>
-                                        <input
-                                            type="text"
-                                            defaultValue={img.alt}
-                                            autoFocus
-                                            className="w-full bg-black border border-white/10 rounded-none px-3 py-2 text-white text-xs outline-none focus:border-secondary"
-                                        />
-                                        <div className="flex gap-2">
-                                            <button type="submit" className="flex-1 py-1.5 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors">
-                                                Speichern
-                                            </button>
-                                            <button type="button" onClick={() => setEditingImage(null)} className="flex-1 py-1.5 bg-white/5 text-white text-[10px] font-bold uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-colors">
-                                                Abbrechen
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            )}
-
-                            {/* Info Bar */}
-                            <div className="p-2 bg-black/60">
-                                <p className="text-[9px] text-gray-400 truncate">{img.alt}</p>
-                                <p className="text-[8px] text-gray-600 font-mono truncate">{img.src}</p>
-                            </div>
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext
+                        items={images.map(img => img.id)}
+                        strategy={rectSortingStrategy}
+                    >
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {images.map((img) => (
+                                <SortableGalleryImage
+                                    key={img.id}
+                                    img={img}
+                                    onEdit={setEditingImage}
+                                    onToggleSpan={toggleImageSpan}
+                                    onDelete={deleteImage}
+                                    isEditing={editingImage === img.id}
+                                    onEditMetadata={updateImageFields}
+                                    onCancelEdit={() => setEditingImage(null)}
+                                />
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </SortableContext>
+                </DndContext>
             </section>
         </div>
     );

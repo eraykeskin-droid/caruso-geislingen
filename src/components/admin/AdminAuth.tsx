@@ -6,29 +6,40 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        // Check if session exists in localStorage
-        const auth = localStorage.getItem('caruso_admin_auth');
-        if (auth === 'true') {
-            setIsLoggedIn(true);
-        } else {
-            setIsLoggedIn(false);
-        }
+        const checkAuth = async () => {
+            try {
+                const res = await fetch('/api/check-auth.php');
+                const data = await res.json();
+                setIsLoggedIn(data.logged_in);
+            } catch (err) {
+                setIsLoggedIn(false);
+            }
+        };
+        checkAuth();
     }, []);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Simple persistent password check for now (as requested: once logged in, stay logged in)
-        if (password === 'Caruso2024!') {
-            localStorage.setItem('caruso_admin_auth', 'true');
-            setIsLoggedIn(true);
-            setError('');
-        } else {
-            setError('Falsches Passwort');
+        try {
+            const res = await fetch('/api/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                setIsLoggedIn(true);
+                setError('');
+            } else {
+                setError(data.error || 'Login fehlgeschlagen');
+            }
+        } catch (err) {
+            setError('Server-Fehler beim Login');
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('caruso_admin_auth');
+    const handleLogout = async () => {
+        await fetch('/api/logout.php');
         setIsLoggedIn(false);
     };
 
@@ -39,7 +50,7 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
             <div className="min-h-screen bg-black flex items-center justify-center px-6">
                 <div className="w-full max-w-md p-8 rounded-none bg-white/[0.03] border border-white/10">
                     <div className="flex flex-col items-center mb-8">
-                        <img src="/caruso-logo-white.svg" alt="Logo" className="w-32 mb-4" />
+                        <img src="/images/caruso-logo-white.svg" alt="Logo" className="w-32 mb-4" />
                         <h1 className="text-xl uppercase tracking-widest text-secondary font-bold">Admin Panel</h1>
                     </div>
 
@@ -75,7 +86,7 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
             <nav className="border-b border-white/5 bg-black sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <img src="/caruso-logo-white.svg" alt="Logo" className="h-8" />
+                        <img src="/images/caruso-logo-white.svg" alt="Logo" className="h-8" />
                         <span className="text-xs uppercase tracking-widest text-secondary font-bold border-l border-white/10 pl-4 hidden md:block">Management</span>
                     </div>
                     <button

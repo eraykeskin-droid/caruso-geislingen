@@ -20,11 +20,25 @@ const defaultDays = [
 
 <script define:vars={{ defaultDays }}>
     const container = document.getElementById("opening-hours-list");
-    if (container) {
-        const saved = localStorage.getItem("caruso_opening_hours");
-        const days = saved ? JSON.parse(saved) : defaultDays;
-        const todayIndex = (new Date().getDay() + 6) % 7;
 
+    async function loadOpeningHours() {
+        if (!container) return;
+
+        try {
+            const res = await fetch(
+                "/api/get-website-data.php?t=" + Date.now()
+            );
+            const data = await res.json();
+            const days = data.success && data.days ? data.days : defaultDays;
+            renderDays(days);
+        } catch (err) {
+            console.error("Error loading opening hours:", err);
+            renderDays(defaultDays);
+        }
+    }
+
+    function renderDays(days) {
+        const todayIndex = (new Date().getDay() + 6) % 7;
         container.innerHTML = days
             .map((day, index) => {
                 const isToday = index === todayIndex;
@@ -51,4 +65,6 @@ const defaultDays = [
             })
             .join("");
     }
+
+    loadOpeningHours();
 </script>

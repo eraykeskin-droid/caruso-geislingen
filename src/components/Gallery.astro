@@ -2,43 +2,43 @@
 const defaultImages = [
     {
         id: "img-1",
-        src: "/images/gallery-06.webp",
+        src: "/images/gallery/gallery-06.webp",
         alt: "Caruso Bar mit Premium-Spirituosen",
         span: "col-span-2",
     },
     {
         id: "img-2",
-        src: "/images/gallery-04.webp",
+        src: "/images/gallery/gallery-04.webp",
         alt: "Premium Shisha mit Cocktail",
         span: "",
     },
     {
         id: "img-3",
-        src: "/images/gallery-01.webp",
+        src: "/images/gallery/gallery-01.webp",
         alt: "Gemütliche Lounge-Ecke",
         span: "",
     },
     {
         id: "img-4",
-        src: "/images/gallery-03.webp",
+        src: "/images/gallery/gallery-03.webp",
         alt: "Speisen, Cocktails und Pizza",
         span: "col-span-2",
     },
     {
         id: "img-5",
-        src: "/images/gallery-05.webp",
+        src: "/images/gallery/gallery-05.webp",
         alt: "Handgefertigter Cocktail",
         span: "",
     },
     {
         id: "img-6",
-        src: "/images/gallery-02.webp",
+        src: "/images/gallery/gallery-02.webp",
         alt: "Chesterfield Lounge-Bereich",
         span: "",
     },
     {
         id: "img-7",
-        src: "/images/gallery-07.webp",
+        src: "/images/gallery/gallery-07.webp",
         alt: "Tropischer Cocktail mit Pizza",
         span: "",
     },
@@ -148,14 +148,36 @@ const defaultImages = [
     const lightboxPrev = document.getElementById("lightbox-prev");
     const lightboxNext = document.getElementById("lightbox-next");
 
-    // Load images from localStorage or use defaults
-    const saved = localStorage.getItem("caruso_gallery_images");
-    const images = saved ? JSON.parse(saved) : defaultImages;
-
+    const BASE_URL = "https://neu.caruso-geislingen.de";
+    let images = defaultImages;
     let currentIndex = 0;
 
-    // Render gallery
-    if (grid) {
+    function getFullSrc(src) {
+        if (!src) return "";
+        if (src.startsWith("http")) return src;
+        // Always use remote path for gallery images as requested
+        if (src.startsWith("/images/")) return BASE_URL + src;
+        return src;
+    }
+
+    async function loadGallery() {
+        try {
+            const res = await fetch(
+                "/api/get-website-data.php?t=" + Date.now()
+            );
+            const data = await res.json();
+            if (data.success && data.images) {
+                images = data.images;
+            }
+            renderGallery();
+        } catch (err) {
+            console.error("Error loading gallery:", err);
+            renderGallery();
+        }
+    }
+
+    function renderGallery() {
+        if (!grid) return;
         grid.innerHTML = images
             .map(
                 (img, i) => `
@@ -163,14 +185,14 @@ const defaultImages = [
                 img.span || ""
             }" data-index="${i}">
                 <img
-                    src="${img.src}"
+                    src="${getFullSrc(img.src)}"
                     alt="${img.alt}"
                     class="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-110"
                     loading="lazy"
                 />
                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500 flex items-end">
                     <p class="text-white text-[10px] uppercase tracking-widest font-bold px-4 pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-y-4 group-hover:translate-y-0">
-                        ${img.alt}
+                        ${img.description || img.alt}
                     </p>
                 </div>
             </div>
@@ -189,10 +211,11 @@ const defaultImages = [
     function openLightbox(index) {
         currentIndex = index;
         if (lightbox && lightboxImg) {
-            lightboxImg.src = images[index].src;
-            lightboxImg.alt = images[index].alt;
+            const img = images[index];
+            lightboxImg.src = getFullSrc(img.src);
+            lightboxImg.alt = img.alt;
             if (lightboxCaption)
-                lightboxCaption.textContent = images[index].alt;
+                lightboxCaption.textContent = img.description || img.alt;
 
             lightboxImg.style.transition = "none";
             lightboxImg.style.transform = "translate3d(0, 0, 0) scale(0.9)";
@@ -207,11 +230,13 @@ const defaultImages = [
             document.body.style.overflow = "hidden";
 
             requestAnimationFrame(() => {
-                lightboxImg.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+                lightboxImg.style.transition =
+                    "opacity 0.3s ease, transform 0.3s ease";
                 lightboxImg.style.opacity = "1";
                 lightboxImg.style.transform = "translate3d(0, 0, 0) scale(1)";
                 if (lightboxCaption) {
-                    lightboxCaption.style.transition = "opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s";
+                    lightboxCaption.style.transition =
+                        "opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s";
                     lightboxCaption.style.opacity = "1";
                     lightboxCaption.style.transform = "translateY(0)";
                 }
@@ -221,11 +246,12 @@ const defaultImages = [
 
     function closeLightbox() {
         if (!lightbox) return;
-        
-        lightboxImg.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+
+        lightboxImg.style.transition =
+            "opacity 0.25s ease, transform 0.25s ease";
         lightboxImg.style.opacity = "0";
         lightboxImg.style.transform = "translate3d(0, 0, 0) scale(0.9)";
-        
+
         if (lightboxCaption) {
             lightboxCaption.style.transition = "opacity 0.2s ease";
             lightboxCaption.style.opacity = "0";
@@ -251,10 +277,11 @@ const defaultImages = [
         setTimeout(() => {
             currentIndex =
                 (currentIndex + direction + images.length) % images.length;
-            lightboxImg.src = images[currentIndex].src;
-            lightboxImg.alt = images[currentIndex].alt;
+            const img = images[currentIndex];
+            lightboxImg.src = getFullSrc(img.src);
+            lightboxImg.alt = img.alt;
             if (lightboxCaption)
-                lightboxCaption.textContent = images[currentIndex].alt;
+                lightboxCaption.textContent = img.description || img.alt;
 
             lightboxImg.style.transition = "none";
             lightboxImg.style.transform = `translate3d(${
@@ -337,4 +364,6 @@ const defaultImages = [
         if (diffX < -50) navigate(1);
         if (diffX > 50) navigate(-1);
     }
+
+    loadGallery();
 </script>

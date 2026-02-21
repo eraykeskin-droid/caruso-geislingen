@@ -101,13 +101,8 @@ import Layout from "../layouts/Layout.astro";
             // Hard Fallback: Mock Data
             renderMenuFromMock(container);
         } catch (err) {
-            console.warn("Menu load failed, trying cache.", err);
-            const cached = localStorage.getItem("caruso_menu_cache");
-            if (cached) {
-                renderMenu(container, JSON.parse(cached));
-            } else {
-                renderMenuFromMock(container);
-            }
+            console.error("Menu load failed, using fallback.", err);
+            renderMenuFromMock(container);
         }
     }
 
