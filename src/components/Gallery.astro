@@ -66,11 +66,11 @@ const defaultImages = [
 <!-- Lightbox -->
 <div
     id="lightbox"
-    class="fixed inset-0 z-[100] bg-black/95 hidden items-center justify-center p-6 cursor-pointer"
+    class="fixed inset-0 z-[100] bg-black/98 hidden items-center justify-center p-6 cursor-pointer touch-none select-none"
 >
     <button
         id="lightbox-close"
-        class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-10"
+        class="absolute top-4 right-4 md:top-6 md:right-6 text-white/50 hover:text-white transition-colors z-10 p-4"
         aria-label="Schließen"
     >
         <svg
@@ -90,7 +90,7 @@ const defaultImages = [
     </button>
     <button
         id="lightbox-prev"
-        class="absolute left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-10"
+        class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-10 p-4"
         aria-label="Vorheriges Bild"
     >
         <svg
@@ -109,7 +109,7 @@ const defaultImages = [
     </button>
     <button
         id="lightbox-next"
-        class="absolute right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-10"
+        class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-10 p-4"
         aria-label="Nächstes Bild"
     >
         <svg
@@ -130,14 +130,20 @@ const defaultImages = [
         id="lightbox-img"
         src=""
         alt=""
-        class="max-w-full max-h-[85vh] object-contain"
+        class="max-w-full max-h-[85vh] object-contain touch-none select-none pointer-events-none"
     />
+    <div
+        id="lightbox-caption"
+        class="absolute bottom-8 left-0 right-0 text-center text-white text-sm font-bold uppercase tracking-[0.2em] px-8 transition-opacity duration-300"
+    >
+    </div>
 </div>
 
 <script define:vars={{ defaultImages }}>
     const grid = document.getElementById("gallery-grid");
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightbox-img");
+    const lightboxCaption = document.getElementById("lightbox-caption");
     const lightboxClose = document.getElementById("lightbox-close");
     const lightboxPrev = document.getElementById("lightbox-prev");
     const lightboxNext = document.getElementById("lightbox-next");
@@ -178,32 +184,97 @@ const defaultImages = [
         });
     }
 
+    let isAnimating = false;
+
     function openLightbox(index) {
         currentIndex = index;
         if (lightbox && lightboxImg) {
             lightboxImg.src = images[index].src;
             lightboxImg.alt = images[index].alt;
+            if (lightboxCaption)
+                lightboxCaption.textContent = images[index].alt;
+
+            lightboxImg.style.transition = "none";
+            lightboxImg.style.transform = "translate3d(0, 0, 0) scale(0.9)";
+            lightboxImg.style.opacity = "0";
+            if (lightboxCaption) {
+                lightboxCaption.style.opacity = "0";
+                lightboxCaption.style.transform = "translateY(20px)";
+            }
+
             lightbox.classList.remove("hidden");
             lightbox.classList.add("flex");
             document.body.style.overflow = "hidden";
+
+            requestAnimationFrame(() => {
+                lightboxImg.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+                lightboxImg.style.opacity = "1";
+                lightboxImg.style.transform = "translate3d(0, 0, 0) scale(1)";
+                if (lightboxCaption) {
+                    lightboxCaption.style.transition = "opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s";
+                    lightboxCaption.style.opacity = "1";
+                    lightboxCaption.style.transform = "translateY(0)";
+                }
+            });
         }
     }
 
     function closeLightbox() {
-        if (lightbox) {
+        if (!lightbox) return;
+        
+        lightboxImg.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+        lightboxImg.style.opacity = "0";
+        lightboxImg.style.transform = "translate3d(0, 0, 0) scale(0.9)";
+        
+        if (lightboxCaption) {
+            lightboxCaption.style.transition = "opacity 0.2s ease";
+            lightboxCaption.style.opacity = "0";
+        }
+
+        setTimeout(() => {
             lightbox.classList.add("hidden");
             lightbox.classList.remove("flex");
             document.body.style.overflow = "";
-        }
+        }, 250);
     }
 
     function navigate(direction) {
-        currentIndex =
-            (currentIndex + direction + images.length) % images.length;
-        if (lightboxImg) {
+        if (isAnimating || !lightboxImg) return;
+        isAnimating = true;
+        lightboxImg.style.transition =
+            "transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease";
+        lightboxImg.style.transform = `translate3d(${
+            direction * -100
+        }vw, 0, 0) scale(1)`;
+        if (lightboxCaption) lightboxCaption.style.opacity = "0";
+
+        setTimeout(() => {
+            currentIndex =
+                (currentIndex + direction + images.length) % images.length;
             lightboxImg.src = images[currentIndex].src;
             lightboxImg.alt = images[currentIndex].alt;
-        }
+            if (lightboxCaption)
+                lightboxCaption.textContent = images[currentIndex].alt;
+
+            lightboxImg.style.transition = "none";
+            lightboxImg.style.transform = `translate3d(${
+                direction * 100
+            }vw, 0, 0) scale(1)`;
+
+            void lightboxImg.offsetWidth;
+
+            lightboxImg.style.transition =
+                "transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease";
+            lightboxImg.style.transform = "translate3d(0, 0, 0) scale(1)";
+            if (lightboxCaption) {
+                lightboxCaption.style.transition = "opacity 0.3s ease 0.1s";
+                lightboxCaption.style.opacity = "1";
+            }
+
+            setTimeout(() => {
+                isAnimating = false;
+            }, 300);
+        }, 300);
     }
 
     lightboxClose?.addEventListener("click", (e) => {
@@ -228,4 +299,42 @@ const defaultImages = [
         if (e.key === "ArrowLeft") navigate(-1);
         if (e.key === "ArrowRight") navigate(1);
     });
+
+    // Touch swipe logic
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    lightbox?.addEventListener(
+        "touchstart",
+        (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        },
+        { passive: true }
+    );
+
+    lightbox?.addEventListener(
+        "touchend",
+        (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        },
+        { passive: true }
+    );
+
+    function handleSwipe() {
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        if (Math.abs(diffY) > Math.abs(diffX) && diffY > 50) {
+            closeLightbox();
+            return;
+        }
+
+        if (diffX < -50) navigate(1);
+        if (diffX > 50) navigate(-1);
+    }
 </script>

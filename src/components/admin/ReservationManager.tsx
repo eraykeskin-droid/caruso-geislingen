@@ -19,38 +19,44 @@ const ReservationManager = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchReservations();
+        loadReservations();
     }, []);
 
-    const fetchReservations = async () => {
-        // Mocking fetch for now
-        const mockRes: Reservation[] = [
-            {
-                id: 'C4012',
-                name: 'Max Mustermann',
-                email: 'max@example.com',
-                phone: '01761234567',
-                guests: 4,
-                date: new Date().toISOString().split('T')[0],
-                time: '19:30',
-                comment: 'Fensterplatz bitte',
-                status: 'pending',
-                created_at: new Date().toISOString()
+    const loadReservations = async () => {
+        try {
+            const res = await fetch(`/api/get-reservations.php?t=${Date.now()}`);
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setReservations(data);
             }
-        ];
-        setReservations(mockRes);
-        setLoading(false);
+        } catch (e) {
+            console.error("Failed to load reservations", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const saveReservations = async (updated: Reservation[]) => {
+        setReservations(updated); // Optimistic UI update
+        try {
+            await fetch('/api/save-reservations.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updated)
+            });
+        } catch (e) {
+            console.error("Failed to save reservations", e);
+        }
     };
 
     const handleStatus = async (id: string, status: 'confirmed' | 'rejected') => {
-        setReservations(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-        console.log(`Update ${id} to ${status}`);
+        const updated = reservations.map(r => r.id === id ? { ...r, status } : r);
+        saveReservations(updated);
     };
 
     const handleDelete = (id: string) => {
         if (confirm('Reservierung wirklich löschen?')) {
-            setReservations(prev => prev.filter(r => r.id !== id));
-            console.log(`Deleted reservation ${id}`);
+            saveReservations(reservations.filter(r => r.id !== id));
         }
     };
 
@@ -61,12 +67,12 @@ const ReservationManager = () => {
     const futureReservations = reservations.filter(r => r.date > today);
 
     return (
-        <div className="p-6 space-y-12">
+        <div className="space-y-12">
             {/* Today's Section */}
             <section>
                 <div className="flex items-center gap-4 mb-8">
-                    <h2 className="text-2xl font-bold text-white uppercase tracking-tighter italic border-l-4 border-red-500 pl-4">
-                        HEUTE <span className="text-red-500 ml-2 animate-pulse">•</span>
+                    <h2 className="text-2xl font-bold text-white uppercase tracking-tighter italic border-l-4 border-green-500 pl-4">
+                        HEUTE <span className="text-green-500 ml-2 animate-pulse">•</span>
                     </h2>
                 </div>
 
@@ -134,20 +140,28 @@ const ReservationCard = ({ res, onStatus, onDelete }: { res: Reservation, onStat
 
         <div className="grid grid-cols-2 gap-4 mb-8 text-sm text-gray-400">
             <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-secondary" />
-                {res.date}
+                <Calendar size={16} className="text-secondary shrink-0" />
+                {new Date(res.date).toLocaleDateString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                })}
             </div>
             <div className="flex items-center gap-2">
-                <Clock size={16} className="text-secondary" />
+                <Clock size={16} className="text-secondary shrink-0" />
                 {res.time} Uhr
             </div>
             <div className="flex items-center gap-2">
-                <Users size={16} className="text-secondary" />
+                <Users size={16} className="text-secondary shrink-0" />
                 {res.guests} Personen
             </div>
             <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-                <Phone size={16} className="text-secondary" />
-                {res.phone}
+                <Phone size={16} className="text-secondary shrink-0" />
+                <a href={`tel:${res.phone}`} className="hover:text-white transition-colors truncate">{res.phone}</a>
+            </div>
+            <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap col-span-2">
+                <Mail size={16} className="text-secondary shrink-0" />
+                <a href={`mailto:${res.email}`} className="hover:text-white transition-colors truncate">{res.email}</a>
             </div>
         </div>
 

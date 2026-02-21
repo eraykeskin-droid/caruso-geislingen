@@ -149,7 +149,7 @@ const WebsiteManager = () => {
     };
 
     return (
-        <div className="p-6 relative space-y-12">
+        <div className="relative space-y-12">
             {saving && (
                 <div className="fixed top-20 right-8 z-50 flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest rounded-none shadow-lg animate-fade-in border border-black/10">
                     <div className="w-2 h-2 bg-black rounded-none animate-ping text-[8px]"></div>

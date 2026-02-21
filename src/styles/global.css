@@ -34,6 +34,48 @@
 
 @layer components {
   .btn-caruso {
-    @apply px-8 py-4 bg-secondary text-black font-bold uppercase tracking-[0.2em] text-xs transition-all duration-300 hover:bg-white hover:-translate-y-1 active:scale-95 flex items-center justify-center;
+    @apply px-8 py-4 bg-secondary text-black font-bold uppercase tracking-[0.2em] text-xs transition duration-300 hover:bg-white hover:-translate-y-1 active:scale-95 flex items-center justify-center;
   }
+}
+
+/* Form element overrides */
+select option {
+  background-color: #111;
+  color: #fff;
+  padding: 8px;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+/* Remove autofill blue/white background */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.95) inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Remove default browser focus ring */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Placeholder color */
+::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.875rem;
+}
+
+/* Remove spin buttons on number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

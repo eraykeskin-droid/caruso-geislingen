@@ -4,7 +4,7 @@
 <div
     class="reservation-form-container w-full max-w-2xl mx-auto p-8 rounded-none bg-white/[0.03] border border-white/10 shadow-2xl"
 >
-    <form id="reservationForm" class="space-y-6">
+    <form id="reservationForm" class="space-y-6" novalidate>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Name -->
             <div class="flex flex-col gap-2">
@@ -18,7 +18,7 @@
                     id="name"
                     name="name"
                     required
-                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white"
+                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white text-sm"
                     placeholder="Dein Vor- und Nachname"
                 />
             </div>
@@ -35,7 +35,7 @@
                     id="email"
                     name="email"
                     required
-                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white"
+                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white text-sm"
                     placeholder="deine@mail.de"
                 />
             </div>
@@ -52,7 +52,7 @@
                     id="phone"
                     name="phone"
                     required
-                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white"
+                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white text-sm"
                     placeholder="0176 ..."
                 />
             </div>
@@ -60,72 +60,248 @@
             <!-- Guests -->
             <div class="flex flex-col gap-2">
                 <label
-                    for="guests"
                     class="text-xs uppercase tracking-widest text-secondary font-bold"
                     >Personenanzahl</label
                 >
-                <select
-                    id="guests"
-                    name="guests"
-                    required
-                    class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white appearance-none cursor-pointer"
-                >
-                    <option value="" disabled selected>Wählen ...</option>
-                    {
-                        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                            <option value={n}>{n} Personen</option>
-                        ))
-                    }
-                    <option value="11">Mehr als 10 (bitte Info)</option>
-                </select>
+                <input type="hidden" id="guests" name="guests" required />
+                <div class="custom-dropdown relative" data-target="guests">
+                    <div
+                        class="dropdown-trigger bg-black/50 border border-white/10 rounded-none px-4 py-3 text-sm cursor-pointer hover:border-secondary/50 transition-colors flex items-center justify-between"
+                    >
+                        <span class="dropdown-text text-white/25"
+                            >Wählen ...</span
+                        >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="text-secondary transition-transform dropdown-chevron"
+                            ><path d="m6 9 6 6 6-6"></path>
+                        </svg>
+                    </div>
+                    <div
+                        class="dropdown-menu hidden absolute z-50 left-0 right-0 mt-1 bg-black border border-white/10 max-h-52 overflow-y-auto"
+                    >
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="1"
+                        >
+                            1 Person
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="2"
+                        >
+                            2 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="3"
+                        >
+                            3 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="4"
+                        >
+                            4 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="5"
+                        >
+                            5 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="6"
+                        >
+                            6 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="7"
+                        >
+                            7 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="8"
+                        >
+                            8 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="9"
+                        >
+                            9 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors"
+                            data-value="10"
+                        >
+                            10 Personen
+                        </div>
+                        <div
+                            class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors border-t border-white/5"
+                            data-value="11"
+                        >
+                            Mehr als 10 (bitte Info)
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Date -->
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-2 md:col-span-2">
                 <label
                     for="date"
                     class="text-xs uppercase tracking-widest text-secondary font-bold"
                     >Datum</label
                 >
-                <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    required
-                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white"
-                />
+                <input type="hidden" id="date" name="date" required />
+                <div
+                    id="calendar-display"
+                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white cursor-pointer hover:border-secondary/50 transition-colors text-sm flex items-center justify-between"
+                >
+                    <span id="calendar-display-text" class="text-white/25"
+                        >Datum wählen ...</span
+                    >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="text-secondary"
+                        ><rect width="18" height="18" x="3" y="4" rx="2" ry="2"
+                        ></rect><line x1="16" x2="16" y1="2" y2="6"></line><line
+                            x1="8"
+                            x2="8"
+                            y1="2"
+                            y2="6"></line><line x1="3" x2="21" y1="10" y2="10"
+                        ></line>
+                    </svg>
+                </div>
+                <div
+                    id="calendar-picker"
+                    class="hidden bg-black border border-white/10 p-4 mt-1 select-none"
+                >
+                    <div class="flex items-center justify-between mb-4">
+                        <button
+                            type="button"
+                            id="cal-prev"
+                            class="p-1 text-gray-500 hover:text-secondary transition-colors"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                ><path d="m15 18-6-6 6-6"></path>
+                            </svg>
+                        </button>
+                        <span
+                            id="cal-month-year"
+                            class="text-xs uppercase tracking-widest text-white font-bold"
+                        ></span>
+                        <button
+                            type="button"
+                            id="cal-next"
+                            class="p-1 text-gray-500 hover:text-secondary transition-colors"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                ><path d="m9 18 6-6-6-6"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                        <span
+                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                            >Mo</span
+                        >
+                        <span
+                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                            >Di</span
+                        >
+                        <span
+                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                            >Mi</span
+                        >
+                        <span
+                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                            >Do</span
+                        >
+                        <span
+                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                            >Fr</span
+                        >
+                        <span
+                            class="text-[9px] uppercase tracking-wider text-secondary/60 font-bold"
+                            >Sa</span
+                        >
+                        <span
+                            class="text-[9px] uppercase tracking-wider text-secondary/60 font-bold"
+                            >So</span
+                        >
+                    </div>
+                    <div id="cal-days" class="grid grid-cols-7 gap-1"></div>
+                </div>
             </div>
 
-            <!-- Time -->
             <div class="flex flex-col gap-2">
                 <label
-                    for="time"
                     class="text-xs uppercase tracking-widest text-secondary font-bold"
                     >Uhrzeit</label
                 >
-                <select
-                    id="time"
-                    name="time"
-                    required
-                    class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white appearance-none cursor-pointer"
-                >
-                    <option value="" disabled selected>Wählen ...</option>
-                    {
-                        [
-                            "18:00",
-                            "18:30",
-                            "19:00",
-                            "19:30",
-                            "20:00",
-                            "20:30",
-                            "21:00",
-                            "21:30",
-                            "22:00",
-                            "22:30",
-                            "23:00",
-                        ].map((t) => <option value={t}>{t} Uhr</option>)
-                    }
-                </select>
+                <input type="hidden" id="time" name="time" required />
+                <div class="custom-dropdown relative" data-target="time">
+                    <div
+                        class="dropdown-trigger bg-black/50 border border-white/10 rounded-none px-4 py-3 text-sm cursor-pointer hover:border-secondary/50 transition-colors flex items-center justify-between"
+                    >
+                        <span class="dropdown-text text-white/25"
+                            >Zuerst Datum wählen ...</span
+                        >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="text-secondary transition-transform dropdown-chevron"
+                            ><path d="m6 9 6 6 6-6"></path>
+                        </svg>
+                    </div>
+                    <div
+                        class="dropdown-menu hidden absolute z-50 left-0 right-0 mt-1 bg-black border border-white/10 max-h-52 overflow-y-auto"
+                    >
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -140,7 +316,7 @@
                 id="comment"
                 name="comment"
                 rows="3"
-                class="bg-black/50 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white resize-none"
+                class="bg-black/50 border border-white/10 rounded-none px-4 py-3 focus:outline-none focus:border-secondary transition-colors text-white resize-none text-sm"
                 placeholder="Besondere Wünsche oder Anmerkungen ..."></textarea>
         </div>
 
@@ -176,6 +352,85 @@
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
+        // Validate all fields
+        const nameVal = (
+            document.getElementById("name") as HTMLInputElement
+        ).value.trim();
+        const emailVal = (
+            document.getElementById("email") as HTMLInputElement
+        ).value.trim();
+        const phoneVal = (
+            document.getElementById("phone") as HTMLInputElement
+        ).value.trim();
+        const guestsVal = (
+            document.getElementById("guests") as HTMLInputElement
+        ).value;
+        const dateVal = (document.getElementById("date") as HTMLInputElement)
+            .value;
+        const timeVal = (document.getElementById("time") as HTMLInputElement)
+            .value;
+
+        let hasError = false;
+
+        // Remove previous inline errors
+        document.querySelectorAll(".field-error").forEach((el) => el.remove());
+        document
+            .querySelectorAll(".border-red-500")
+            .forEach((el) => el.classList.remove("border-red-500"));
+
+        function showError(fieldEl: Element | null, message: string) {
+            if (!fieldEl) return;
+            fieldEl.classList.add("border-red-500");
+            const hint = document.createElement("span");
+            hint.className =
+                "field-error text-red-400 text-[10px] uppercase tracking-wider mt-1 block";
+            hint.textContent = message;
+            fieldEl.parentElement?.appendChild(hint);
+            hasError = true;
+        }
+
+        if (!nameVal) {
+            showError(document.getElementById("name"), "Bitte Namen eingeben");
+        }
+        if (!emailVal) {
+            showError(
+                document.getElementById("email"),
+                "Bitte E-Mail eingeben"
+            );
+        }
+        if (!phoneVal) {
+            showError(
+                document.getElementById("phone"),
+                "Bitte Telefonnummer eingeben"
+            );
+        }
+        if (!guestsVal) {
+            showError(
+                document.querySelector(
+                    '.custom-dropdown[data-target="guests"] .dropdown-trigger'
+                ),
+                "Bitte Personenanzahl wählen"
+            );
+        }
+        if (!dateVal) {
+            showError(
+                document.getElementById("calendar-display"),
+                "Bitte Datum wählen"
+            );
+        }
+        if (!timeVal) {
+            showError(
+                document.querySelector(
+                    '.custom-dropdown[data-target="time"] .dropdown-trigger'
+                ),
+                "Bitte Uhrzeit wählen"
+            );
+        }
+
+        if (hasError) {
+            return;
+        }
+
         submitBtn.disabled = true;
         submitBtn.innerHTML = "Wird gesendet ...";
 
@@ -183,16 +438,28 @@
         const data = Object.fromEntries(formData.entries());
 
         try {
-            // Mocking the API call for now
-            // const response = await fetch('/api/save-reservation.php', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(data)
-            // });
+            // Save reservation to backend API
+            const reservation = {
+                id: "C" + Date.now().toString().slice(-6),
+                name: data.name,
+                email: data.email,
+                phone: data.phone,
+                guests: Number(data.guests),
+                date: data.date,
+                time: data.time,
+                comment: data.comment || "",
+                status: "pending",
+                created_at: new Date().toISOString(),
+            };
 
-            console.log("Reservation Data:", data);
+            await fetch("/api/save-reservation.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reservation),
+            });
 
-            // Simulate success
+            console.log("Reservation sent to server");
+
             setTimeout(() => {
                 if (statusMessage) {
                     statusMessage.classList.remove(
@@ -207,7 +474,51 @@
                     statusMessage.innerHTML =
                         "Optimal! Deine Reservierungsanfrage wurde gesendet. Wir melden uns in Kürze per E-Mail bei dir.";
                 }
+
+                // Reset native form
                 form.reset();
+
+                // Reset custom dropdowns
+                document.querySelectorAll(".custom-dropdown").forEach((d) => {
+                    const text = d.querySelector(
+                        ".dropdown-text"
+                    ) as HTMLElement;
+                    const menu = d.querySelector(".dropdown-menu");
+                    const chevron = d.querySelector(".dropdown-chevron");
+                    const targetId = (d as HTMLElement).dataset.target!;
+                    const input = document.getElementById(
+                        targetId
+                    ) as HTMLInputElement;
+                    if (input) input.value = "";
+                    if (text) {
+                        text.textContent =
+                            targetId === "time"
+                                ? "Zuerst Datum wählen ..."
+                                : "Wählen ...";
+                        text.classList.remove("text-white");
+                        text.classList.add("text-white/25");
+                    }
+                    menu?.classList.add("hidden");
+                    chevron?.classList.remove("rotate-180");
+                    menu?.querySelectorAll(".dropdown-item").forEach((i) => {
+                        i.classList.remove("bg-secondary/20", "text-secondary");
+                    });
+                });
+
+                // Reset calendar display
+                const calText = document.getElementById(
+                    "calendar-display-text"
+                );
+                const dateHidden = document.getElementById(
+                    "date"
+                ) as HTMLInputElement;
+                if (calText) {
+                    calText.textContent = "Datum wählen ...";
+                    calText.classList.remove("text-white");
+                    calText.classList.add("text-white/25");
+                }
+                if (dateHidden) dateHidden.value = "";
+
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = "Anfrage Senden";
             }, 1500);
@@ -227,8 +538,262 @@
         }
     });
 
-    // Set min date to today
+    // Custom Dropdowns
+    const dropdowns = document.querySelectorAll(".custom-dropdown");
+    dropdowns.forEach((dropdown) => {
+        const trigger = dropdown.querySelector(".dropdown-trigger")!;
+        const menu = dropdown.querySelector(".dropdown-menu")!;
+        const textEl = dropdown.querySelector(".dropdown-text")! as HTMLElement;
+        const chevron = dropdown.querySelector(
+            ".dropdown-chevron"
+        )! as HTMLElement;
+        const targetId = (dropdown as HTMLElement).dataset.target!;
+        const hiddenInput = document.getElementById(
+            targetId
+        ) as HTMLInputElement;
+
+        trigger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            // Close all other dropdowns
+            dropdowns.forEach((d) => {
+                if (d !== dropdown) {
+                    d.querySelector(".dropdown-menu")?.classList.add("hidden");
+                    d.querySelector(".dropdown-chevron")?.classList.remove(
+                        "rotate-180"
+                    );
+                }
+            });
+            menu.classList.toggle("hidden");
+            chevron.classList.toggle("rotate-180");
+        });
+
+        menu.querySelectorAll(".dropdown-item").forEach((item) => {
+            item.addEventListener("click", () => {
+                const value = (item as HTMLElement).dataset.value!;
+                const label = item.textContent!;
+                hiddenInput.value = value;
+                textEl.textContent = label;
+                textEl.classList.remove("text-white/25");
+                textEl.classList.add("text-white");
+                menu.classList.add("hidden");
+                chevron.classList.remove("rotate-180");
+
+                // Highlight selected
+                menu.querySelectorAll(".dropdown-item").forEach((i) => {
+                    i.classList.remove("bg-secondary/20", "text-secondary");
+                });
+                item.classList.add("bg-secondary/20", "text-secondary");
+            });
+        });
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        dropdowns.forEach((d) => {
+            if (!d.contains(target)) {
+                d.querySelector(".dropdown-menu")?.classList.add("hidden");
+                d.querySelector(".dropdown-chevron")?.classList.remove(
+                    "rotate-180"
+                );
+            }
+        });
+    });
+
+    // Calendar Picker
     const dateInput = document.getElementById("date") as HTMLInputElement;
-    const today = new Date().toISOString().split("T")[0];
-    dateInput.min = today;
+    const timeInput = document.getElementById("time") as HTMLInputElement;
+    const timeDropdown = document.querySelector(
+        '.custom-dropdown[data-target="time"]'
+    )!;
+    const timeMenu = timeDropdown.querySelector(".dropdown-menu")!;
+    const timeText = timeDropdown.querySelector(
+        ".dropdown-text"
+    )! as HTMLElement;
+    const calDisplay = document.getElementById("calendar-display")!;
+    const calDisplayText = document.getElementById("calendar-display-text")!;
+    const calPicker = document.getElementById("calendar-picker")!;
+    const calDays = document.getElementById("cal-days")!;
+    const calMonthYear = document.getElementById("cal-month-year")!;
+    const calPrev = document.getElementById("cal-prev")!;
+    const calNext = document.getElementById("cal-next")!;
+
+    const months = [
+        "Januar",
+        "Februar",
+        "März",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Dezember",
+    ];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+
+    function pad(n: number) {
+        return n < 10 ? "0" + n : "" + n;
+    }
+
+    function renderCalendar() {
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        let startDay = firstDay.getDay() - 1;
+        if (startDay < 0) startDay = 6;
+
+        calMonthYear.textContent = `${months[currentMonth]} ${currentYear}`;
+        calDays.innerHTML = "";
+
+        for (let i = 0; i < startDay; i++) {
+            calDays.innerHTML += "<div></div>";
+        }
+
+        for (let d = 1; d <= lastDay.getDate(); d++) {
+            const date = new Date(currentYear, currentMonth, d);
+            const dateStr = `${currentYear}-${pad(currentMonth + 1)}-${pad(d)}`;
+            const isPast = date < today;
+            const isToday = date.getTime() === today.getTime();
+            const isSelected = dateInput.value === dateStr;
+            const dayOfWeek = date.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+            let cls = "py-2 text-xs text-center transition-all cursor-pointer ";
+            if (isPast) {
+                cls += "text-gray-700 cursor-not-allowed";
+            } else if (isSelected) {
+                cls += "bg-secondary text-black font-bold";
+            } else if (isToday) {
+                cls +=
+                    "border border-secondary text-secondary font-bold hover:bg-secondary/20";
+            } else if (isWeekend) {
+                cls += "text-secondary/80 hover:bg-secondary/10 font-medium";
+            } else {
+                cls += "text-gray-300 hover:bg-white/10";
+            }
+
+            calDays.innerHTML += `<div class="${cls}" data-date="${dateStr}">${d}</div>`;
+        }
+
+        calDays.querySelectorAll("[data-date]").forEach((el) => {
+            const dateVal = (el as HTMLElement).dataset.date!;
+            const dateObj = new Date(dateVal + "T00:00:00");
+            if (dateObj < today) return;
+            el.addEventListener("click", () => {
+                dateInput.value = dateVal;
+                const formatted = `${dateObj.getDate()}. ${
+                    months[dateObj.getMonth()]
+                } ${dateObj.getFullYear()}`;
+                calDisplayText.textContent = formatted;
+                calDisplayText.classList.remove("text-white/25");
+                calDisplayText.classList.add("text-white");
+                calPicker.classList.add("hidden");
+                renderCalendar();
+                updateTimeSlots();
+            });
+        });
+    }
+
+    calDisplay.addEventListener("click", () => {
+        calPicker.classList.toggle("hidden");
+        renderCalendar();
+    });
+
+    calPrev.addEventListener("click", () => {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar();
+    });
+
+    calNext.addEventListener("click", () => {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar();
+    });
+
+    const weekdayTimes = [
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30",
+        "20:00",
+        "20:30",
+        "21:00",
+        "21:30",
+        "22:00",
+        "22:30",
+        "23:00",
+    ];
+    const weekendTimes = [
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        ...weekdayTimes,
+    ];
+
+    function updateTimeSlots() {
+        const val = dateInput.value;
+        if (!val) return;
+        const dayOfWeek = new Date(val + "T00:00:00").getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const times = isWeekend ? weekendTimes : weekdayTimes;
+
+        const prevValue = timeInput.value;
+        timeMenu.innerHTML = times
+            .map(
+                (t) =>
+                    `<div class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors ${
+                        t === prevValue ? "bg-secondary/20 text-secondary" : ""
+                    }" data-value="${t}">${t} Uhr</div>`
+            )
+            .join("");
+
+        timeText.textContent = "Wählen ...";
+        timeText.classList.remove("text-white");
+        timeText.classList.add("text-white/25");
+
+        // Re-attach click handlers for new items
+        timeMenu.querySelectorAll(".dropdown-item").forEach((item) => {
+            item.addEventListener("click", () => {
+                const value = (item as HTMLElement).dataset.value!;
+                timeInput.value = value;
+                timeText.textContent = value + " Uhr";
+                timeText.classList.remove("text-white/25");
+                timeText.classList.add("text-white");
+                timeMenu.classList.add("hidden");
+                timeDropdown
+                    .querySelector(".dropdown-chevron")
+                    ?.classList.remove("rotate-180");
+
+                timeMenu.querySelectorAll(".dropdown-item").forEach((i) => {
+                    i.classList.remove("bg-secondary/20", "text-secondary");
+                });
+                item.classList.add("bg-secondary/20", "text-secondary");
+            });
+        });
+
+        // Keep previous value if still valid
+        if (prevValue && times.includes(prevValue)) {
+            timeInput.value = prevValue;
+            timeText.textContent = prevValue + " Uhr";
+            timeText.classList.remove("text-white/25");
+            timeText.classList.add("text-white");
+        }
+    }
 </script>

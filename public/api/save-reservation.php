@@ -11,16 +11,15 @@ if (!$input) {
 }
 
 try {
-    // Check if it's an update (has ID) or new
-    $isUpdate = isset($input['id_pk']); // Internal PK
+    $isUpdate = false;
 
-    if (isset($input['id']) && !$isUpdate) {
-        // Checking for existing external ID (C4012 style)
+    // Check if it already exists
+    if (!empty($input['id'])) {
         $stmt = $pdo->prepare("SELECT id FROM reservations WHERE id = ?");
         $stmt->execute([$input['id']]);
-        $exists = $stmt->fetch();
-        if ($exists)
+        if ($stmt->fetch()) {
             $isUpdate = true;
+        }
     }
 
     if ($isUpdate) {
@@ -33,15 +32,14 @@ try {
             $input['guests'],
             $input['date'],
             $input['time'],
-            $input['comment'],
+            $input['comment'] ?? '',
             $input['id']
         ]);
     }
     else {
-        // Generate external ID if not provided
-        $externalId = $input['id'] ?? 'C' . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+        $externalId = !empty($input['id']) ? $input['id'] : 'C' . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
-        $stmt = $pdo->prepare("INSERT INTO reservations (id, name, email, phone, guests, date, time, comment, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO reservations (id, name, email, phone, guests, date, time, comment, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $externalId,
             $input['name'],
@@ -50,10 +48,15 @@ try {
             $input['guests'],
             $input['date'],
             $input['time'],
-            $input['comment'],
-            'pending'
+            $input['comment'] ?? '',
+            $input['status'] ?? 'pending',
+            $input['created_at'] ?? date('Y-m-d H:i:s')
         ]);
     }
+
+    // Trigger email notification
+    require_once 'mail.php';
+    sendReservationMail($input, $isUpdate);
 
     echo json_encode(['success' => true]);
 }

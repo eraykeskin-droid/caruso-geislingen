@@ -1,13 +1,9 @@
 <?php
 // db.php - MySQL Connection
-
-// Load configuration if exists (e.g. from config.php or environment)
-$config = include(__DIR__ . '/../../config.php');
-
-$host = 'localhost'; // Adjust for IONOS if necessary
-$db = 'caruso_db';
-$user = 'caruso_user';
-$pass = $config['mail_password'] ?? ''; // Reusing for DB if same, or adjust
+$host = 'db5019852733.hosting-data.io';
+$db = 'dbs15349596';
+$user = 'dbu1562239';
+$pass = 'Caruso2024!';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -21,9 +17,8 @@ try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 }
 catch (\PDOException $e) {
-    // For development, we might want to see the error. In production, log it.
     header('Content-Type: application/json');
-    echo json_encode(['success' => false, 'error' => 'Database connection failed']);
+    echo json_encode(['success' => false, 'error' => 'Database connection failed: ' . $e->getMessage()]);
     exit;
 }
 ?>

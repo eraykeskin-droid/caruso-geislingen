@@ -86,37 +86,14 @@ import Layout from "../layouts/Layout.astro";
 
         try {
             // Priority 1: Primary PHP API
-            let res = await fetch("/api/get-menu.php");
+            let res = await fetch(`/api/get-menu.php?t=${Date.now()}`);
             let contentType = res.headers.get("content-type");
 
             if (contentType && contentType.includes("application/json")) {
                 const data = await res.json();
-                if (Array.isArray(data) && data.length > 0) {
+                if (Array.isArray(data)) {
+                    // Empty array is valid (empty menu)
                     renderMenu(container, data);
-                    localStorage.setItem(
-                        "caruso_menu_cache",
-                        JSON.stringify(data)
-                    );
-                    return;
-                }
-            }
-
-            // Priority 2: LocalStorage (Preferred Fallback)
-            const cached = localStorage.getItem("caruso_menu_cache");
-            if (cached) {
-                const cachedData = JSON.parse(cached);
-                if (Array.isArray(cachedData) && cachedData.length > 0) {
-                    renderMenu(container, cachedData);
-                    return;
-                }
-            }
-
-            // Priority 3: Static menu.json
-            let staticRes = await fetch("/api/menu.json");
-            if (staticRes.ok) {
-                const staticData = await staticRes.json();
-                if (Array.isArray(staticData) && staticData.length > 0) {
-                    renderMenu(container, staticData);
                     return;
                 }
             }
@@ -174,85 +151,87 @@ import Layout from "../layouts/Layout.astro";
             const isSpecial = !!category.is_special;
             const bgColor =
                 category.bg_color || (isSpecial ? "#ffe08a" : "#000000");
+            const subcategories = category.subcategories || [];
+            const hasSubcategories = subcategories.length > 0;
+            const directItems = category.items || [];
 
             const section = document.createElement("div");
             section.className =
                 "category-section mb-16 last:mb-0 transition-all duration-700 opacity-0 transform translate-y-8";
             section.style.animationDelay = catIdx * 0.15 + "s";
 
-            if (bgColor !== "#000000" || isSpecial) {
-                section.classList.add(
-                    "p-6",
-                    "md:p-10",
-                    "rounded-none",
-                    "border-l-4",
-                    "transition-all",
-                    "duration-500"
-                );
+            section.classList.add(
+                "p-6",
+                "md:p-10",
+                "rounded-none",
+                "border-l-4",
+                "transition-all",
+                "duration-500"
+            );
 
-                // Subtle glass background
-                section.style.backgroundColor = bgColor + "10";
+            if (isSpecial) {
+                section.style.backgroundColor = bgColor + "15";
                 section.style.borderColor = bgColor;
-
-                // Modern glow effect (removed blur/glow as requested)
                 section.style.boxShadow = `none`;
+            } else {
+                section.style.backgroundColor = "rgba(255, 255, 255, 0.02)";
+                section.style.borderColor = "rgba(255, 255, 255, 0.1)";
             }
 
             let headerHtml = `
-                <div class="flex items-center gap-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 mb-8">
                     <h2 class="text-2xl md:text-4xl font-bold uppercase tracking-tighter italic ${
                         isSpecial ? "text-secondary" : "text-white"
                     }">
                         ${category.name}
                     </h2>
-                    ${
-                        isSpecial
-                            ? '<span class="bg-secondary text-black text-[9px] font-black uppercase py-1 px-3 tracking-[0.2em] rounded-none animate-pulse">Special</span>'
-                            : ""
-                    }
-                    <div class="h-[1px] flex-grow ${
-                        isSpecial ? "bg-secondary/20" : "bg-white/10"
-                    }"></div>
+                    <div class="flex items-center gap-4 w-full md:w-auto md:flex-grow">
+                        ${
+                            isSpecial
+                                ? `<span class="bg-secondary text-black text-[9px] font-black uppercase py-1 px-3 tracking-[0.2em] rounded-none animate-pulse shrink-0">${
+                                      category.badge_text || "Special"
+                                  }</span>`
+                                : ""
+                        }
+                        <div class="h-[1px] w-full flex-grow ${
+                            isSpecial ? "bg-secondary/20" : "bg-white/10"
+                        }"></div>
+                    </div>
                 </div>
             `;
 
-            let itemsHtml =
-                '<div class="grid grid-cols-1 gap-y-0 text-left w-full">';
-            if (category.items && Array.isArray(category.items)) {
-                itemsHtml += category.items
-                    .map((item: any) => {
-                        const priceNum =
-                            typeof item.price === "number"
-                                ? item.price
-                                : parseFloat(item.price);
-                        const formattedPrice = priceNum
-                            .toFixed(2)
-                            .replace(".", ",");
-
-                        return `
-                        <div class="menu-item group flex flex-col gap-1 py-4 border-b border-white/[0.05] last:border-0 hover:bg-white/[0.01] transition-all duration-300 rounded-none">
-                            <div class="flex justify-between items-baseline gap-4">
-                                <h3 class="text-white text-base font-bold group-hover:text-secondary transition-colors uppercase tracking-wider">${
-                                    item.name
-                                }</h3>
-                                <div class="flex items-baseline gap-0.5 text-secondary font-black whitespace-nowrap">
-                                    <span>${formattedPrice}</span>
-                                    <span class="text-[10px] ml-0.5">€</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center text-[11px] text-gray-300 font-medium tracking-wide">
-                                <span class="opacity-90">${
-                                    item.info || ""
-                                }</span>
-                                <span class="uppercase tracking-widest text-[10px] font-bold text-gray-400">${
-                                    item.unit || ""
-                                }</span>
-                            </div>
-                        </div>
+            let itemsHtml = '<div class="grid grid-cols-1 gap-y-0 text-left w-full">';
+            
+            if (hasSubcategories) {
+                subcategories.forEach((sub: any) => {
+                    itemsHtml += `
+                        <div class="mb-4">
+                            <h3 class="text-secondary text-xs font-black uppercase tracking-wider mb-2 inline-block bg-secondary/10 px-2 py-1">
+                                ${sub.name}
+                            </h3>
+                            <div class="flex flex-col gap-y-0 -mt-2">
                     `;
-                    })
-                    .join("");
+                    
+                    if (sub.items && Array.isArray(sub.items) && sub.items.length > 0) {
+                        sub.items.forEach((item: any) => {
+                            itemsHtml += renderMenuItem(item, true);
+                        });
+                    } else {
+                        itemsHtml += '<p class="text-[10px] text-gray-500 italic py-2">Keine Artikel</p>';
+                    }
+                    
+                    itemsHtml += `</div></div>`;
+                });
+                
+                directItems.forEach((item: any) => {
+                    itemsHtml += renderMenuItem(item);
+                });
+            } else {
+                directItems.forEach((item: any) => {
+                    itemsHtml += renderMenuItem(item);
+                });
             }
+            
             itemsHtml += "</div>";
 
             section.innerHTML = headerHtml + itemsHtml;
@@ -263,6 +242,80 @@ import Layout from "../layouts/Layout.astro";
                 section.classList.add("opacity-100", "translate-y-0");
             }, 50);
         });
+
+        const legendHtml = `
+            <div class="mt-20 p-6 md:p-8 border border-white/10 bg-white/[0.02] rounded-none opacity-0 transform translate-y-8 transition-all duration-700" id="allergens-legend">
+                <h3 class="text-secondary text-sm font-bold uppercase tracking-widest mb-4">Allergene & Zusatzstoffe</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-[10px] text-gray-500 tracking-wider">
+                    <div><span class="text-white font-bold">1</span> mit Farbstoff</div>
+                    <div><span class="text-white font-bold">2</span> mit Konservierungsstoff</div>
+                    <div><span class="text-white font-bold">3</span> mit Antioxidationsmittel</div>
+                    <div><span class="text-white font-bold">4</span> mit Geschmacksverstärker</div>
+                    <div><span class="text-white font-bold">5</span> geschwefelt</div>
+                    <div><span class="text-white font-bold">6</span> geschwärzt</div>
+                    <div><span class="text-white font-bold">7</span> gewachst</div>
+                    <div><span class="text-white font-bold">8</span> mit Süßungsmitteln</div>
+                    <div><span class="text-white font-bold">9</span> koffeinhaltig</div>
+                    <div><span class="text-white font-bold">A</span> glutenhaltiges Getreide</div>
+                    <div><span class="text-white font-bold">E</span> Erdnüsse</div>
+                    <div><span class="text-white font-bold">G</span> Milch/Laktose</div>
+                    <div><span class="text-white font-bold">H</span> Schalenfrüchte/Nüsse</div>
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML("beforeend", legendHtml);
+
+        setTimeout(() => {
+            const legend = document.getElementById("allergens-legend");
+            if (legend) {
+                legend.classList.remove("opacity-0", "translate-y-8");
+                legend.classList.add("opacity-100", "translate-y-0");
+            }
+        }, data.length * 150 + 100);
+    }
+
+    function renderMenuItem(item: any, withBackground = false) {
+        const priceNum =
+            typeof item.price === "number"
+                ? item.price
+                : parseFloat(item.price);
+        const formattedPrice = priceNum
+            .toFixed(2)
+            .replace(".", ",");
+
+        const bgClass = withBackground ? "bg-white/[0.02] -mx-4 px-4" : "";
+        const hasInfo = item.info || item.unit || item.allergens;
+        const heightClass = hasInfo ? "py-4" : "py-2";
+        const infoHtml = hasInfo ? `
+            <div class="flex justify-between items-center text-[11px] text-gray-300 font-medium tracking-wide mt-1">
+                <span class="opacity-90 flex items-center gap-2">
+                    ${item.info || ""}
+                    ${
+                        item.allergens
+                            ? `<span class="text-[9px] font-mono font-medium text-gray-400 bg-white/5 px-2 py-0.5 border border-white/10 tracking-widest leading-none" title="Allergene & Zusatzstoffe">${item.allergens}</span>`
+                            : ""
+                    }
+                </span>
+                <span class="uppercase tracking-widest text-[10px] font-bold text-gray-400">${
+                    item.unit || ""
+                }</span>
+            </div>
+        ` : '';
+
+        return `
+            <div class="menu-item group flex flex-col gap-1 ${heightClass} border-b border-white/[0.05] last:border-0 hover:bg-white/[0.01] transition-all duration-300 rounded-none ${bgClass}">
+                <div class="flex justify-between items-baseline gap-4">
+                    <h3 class="text-white text-base font-bold group-hover:text-secondary transition-colors uppercase tracking-wider flex items-center gap-3">
+                        ${item.name}
+                    </h3>
+                    <div class="flex items-baseline gap-0.5 text-secondary font-black whitespace-nowrap">
+                        <span>${formattedPrice} €</span>
+                    </div>
+                </div>
+                ${infoHtml}
+            </div>
+        `;
     }
 
     // Initialize

@@ -1,13 +1,12 @@
 <?php
 // get-reservations.php
 header('Content-Type: application/json');
+header('Cache-Control: no-cache, must-revalidate');
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
 require_once 'db.php';
 
 try {
-    // Auto-cleanup: Delete reservations older than 2 days
-    $pdo->query("DELETE FROM reservations WHERE date < DATE_SUB(CURDATE(), INTERVAL 2 DAY)");
-
-    $stmt = $pdo->query("SELECT * FROM reservations ORDER BY date DESC, time ASC");
+    $stmt = $pdo->query("SELECT * FROM reservations ORDER BY created_at DESC");
     $reservations = $stmt->fetchAll();
     echo json_encode($reservations);
 }
