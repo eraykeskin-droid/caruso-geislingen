@@ -43,15 +43,15 @@ const ReservationManager = () => {
     };
 
     const handleStatus = async (id: string, status: 'confirmed' | 'rejected') => {
-        // Update local state for immediate feedback
         setReservations(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-
-        // API call would go here
         console.log(`Update ${id} to ${status}`);
     };
 
-    const deleteOld = () => {
-        // Logic to clear old reservations (> 2 days)
+    const handleDelete = (id: string) => {
+        if (confirm('Reservierung wirklich löschen?')) {
+            setReservations(prev => prev.filter(r => r.id !== id));
+            console.log(`Deleted reservation ${id}`);
+        }
     };
 
     if (loading) return <div className="p-8 text-center text-gray-500">Lade Reservierungen...</div>;
@@ -72,7 +72,7 @@ const ReservationManager = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {todayReservations.length > 0 ? todayReservations.map(res => (
-                        <ReservationCard key={res.id} res={res} onStatus={handleStatus} />
+                        <ReservationCard key={res.id} res={res} onStatus={handleStatus} onDelete={handleDelete} />
                     )) : (
                         <p className="text-gray-600 italic">Keine Reservierungen für heute.</p>
                     )}
@@ -89,7 +89,7 @@ const ReservationManager = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {futureReservations.length > 0 ? futureReservations.map(res => (
-                        <ReservationCard key={res.id} res={res} onStatus={handleStatus} />
+                        <ReservationCard key={res.id} res={res} onStatus={handleStatus} onDelete={handleDelete} />
                     )) : (
                         <p className="text-gray-600 italic">Keine weiteren Reservierungen.</p>
                     )}
@@ -99,21 +99,36 @@ const ReservationManager = () => {
     );
 };
 
-const ReservationCard = ({ res, onStatus }: { res: Reservation, onStatus: (id: string, s: any) => void }) => (
-    <div className={`p-6 rounded-xl border transition-all duration-300 ${res.status === 'pending' ? 'bg-white/[0.05] border-white/10' :
-            res.status === 'confirmed' ? 'bg-green-500/10 border-green-500/20' :
-                'bg-red-500/10 border-red-500/20 opacity-60'
+const statusLabels: Record<string, string> = {
+    pending: 'Ausstehend',
+    confirmed: 'Bestätigt',
+    rejected: 'Abgelehnt',
+};
+
+const ReservationCard = ({ res, onStatus, onDelete }: { res: Reservation, onStatus: (id: string, s: any) => void, onDelete: (id: string) => void }) => (
+    <div className={`p-6 rounded-none border transition-all duration-300 ${res.status === 'pending' ? 'bg-white/[0.05] border-white/10' :
+        res.status === 'confirmed' ? 'bg-green-500/10 border-green-500/20' :
+            'bg-red-500/10 border-red-500/20 opacity-60'
         }`}>
         <div className="flex justify-between items-start mb-6">
             <div>
                 <h3 className="text-xl font-bold text-white mb-1">{res.name}</h3>
                 <span className="text-xs font-mono text-secondary uppercase tracking-widest">{res.id}</span>
             </div>
-            <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${res.status === 'pending' ? 'bg-white/10 text-white' :
+            <div className="flex items-center gap-2">
+                <div className={`px-3 py-1 rounded-none text-[10px] font-bold uppercase tracking-widest ${res.status === 'pending' ? 'bg-white/10 text-white' :
                     res.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
                         'bg-red-500/20 text-red-400'
-                }`}>
-                {res.status}
+                    }`}>
+                    {statusLabels[res.status]}
+                </div>
+                <button
+                    onClick={() => onDelete(res.id)}
+                    className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-none transition-all"
+                    title="Reservierung löschen"
+                >
+                    <Trash2 size={14} />
+                </button>
             </div>
         </div>
 
@@ -137,7 +152,7 @@ const ReservationCard = ({ res, onStatus }: { res: Reservation, onStatus: (id: s
         </div>
 
         {res.comment && (
-            <div className="mb-8 p-3 rounded bg-black/40 text-xs text-gray-500 italic border-l border-secondary/30">
+            <div className="mb-8 p-3 rounded-none bg-black/40 text-xs text-gray-500 italic border-l border-secondary/30">
                 "{res.comment}"
             </div>
         )}
@@ -146,13 +161,13 @@ const ReservationCard = ({ res, onStatus }: { res: Reservation, onStatus: (id: s
             <div className="flex gap-4">
                 <button
                     onClick={() => onStatus(res.id, 'confirmed')}
-                    className="flex-grow flex items-center justify-center gap-2 py-2 bg-green-600 hover:bg-green-500 text-white text-xs font-bold uppercase tracking-widest transition-colors rounded"
+                    className="flex-grow flex items-center justify-center gap-2 py-2 bg-green-600 hover:bg-green-500 text-white text-xs font-bold uppercase tracking-widest transition-colors rounded-none"
                 >
                     <Check size={14} /> Bestätigen
                 </button>
                 <button
                     onClick={() => onStatus(res.id, 'rejected')}
-                    className="flex-grow flex items-center justify-center gap-2 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold uppercase tracking-widest transition-colors rounded"
+                    className="flex-grow flex items-center justify-center gap-2 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold uppercase tracking-widest transition-colors rounded-none"
                 >
                     <X size={14} /> Ablehnen
                 </button>

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import MenuManager from './MenuManager';
 import ReservationManager from './ReservationManager';
+import WebsiteManager from './WebsiteManager';
 
 const AdminDashboard = () => {
-    const [activeTab, setActiveTab] = useState<'menu' | 'reservations'>('reservations');
+    const [activeTab, setActiveTab] = useState<'menu' | 'reservations' | 'website'>('reservations');
 
     return (
         <div className="p-6">
@@ -13,7 +14,7 @@ const AdminDashboard = () => {
                         Dashboard
                     </h1>
                     <p className="text-gray-500">
-                        Zentralverwaltung für Getränke und Reservierungen
+                        Zentralverwaltung für Getränke, Reservierungen und Webseite
                     </p>
                 </div>
 
@@ -22,8 +23,8 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('reservations')}
                         className={`pb-4 text-xs uppercase tracking-widest font-bold transition-all ${activeTab === 'reservations'
-                                ? 'text-secondary border-b-2 border-secondary'
-                                : 'text-gray-500 hover:text-white'
+                            ? 'text-secondary border-b-2 border-secondary'
+                            : 'text-gray-500 hover:text-white'
                             }`}
                     >
                         Reservierungen
@@ -31,11 +32,20 @@ const AdminDashboard = () => {
                     <button
                         onClick={() => setActiveTab('menu')}
                         className={`pb-4 text-xs uppercase tracking-widest font-bold transition-all ${activeTab === 'menu'
-                                ? 'text-secondary border-b-2 border-secondary'
-                                : 'text-gray-500 hover:text-white'
+                            ? 'text-secondary border-b-2 border-secondary'
+                            : 'text-gray-500 hover:text-white'
                             }`}
                     >
                         Getränkekarte
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('website')}
+                        className={`pb-4 text-xs uppercase tracking-widest font-bold transition-all ${activeTab === 'website'
+                            ? 'text-secondary border-b-2 border-secondary'
+                            : 'text-gray-500 hover:text-white'
+                            }`}
+                    >
+                        Webseite
                     </button>
                 </div>
 
@@ -49,6 +59,11 @@ const AdminDashboard = () => {
                     {activeTab === 'reservations' && (
                         <div className="animate-fade-in">
                             <ReservationManager />
+                        </div>
+                    )}
+                    {activeTab === 'website' && (
+                        <div className="animate-fade-in">
+                            <WebsiteManager />
                         </div>
                     )}
                 </div>

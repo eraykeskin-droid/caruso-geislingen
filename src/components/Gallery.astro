@@ -1,0 +1,231 @@
+---
+const defaultImages = [
+    {
+        id: "img-1",
+        src: "/images/gallery-06.webp",
+        alt: "Caruso Bar mit Premium-Spirituosen",
+        span: "col-span-2",
+    },
+    {
+        id: "img-2",
+        src: "/images/gallery-04.webp",
+        alt: "Premium Shisha mit Cocktail",
+        span: "",
+    },
+    {
+        id: "img-3",
+        src: "/images/gallery-01.webp",
+        alt: "Gemütliche Lounge-Ecke",
+        span: "",
+    },
+    {
+        id: "img-4",
+        src: "/images/gallery-03.webp",
+        alt: "Speisen, Cocktails und Pizza",
+        span: "col-span-2",
+    },
+    {
+        id: "img-5",
+        src: "/images/gallery-05.webp",
+        alt: "Handgefertigter Cocktail",
+        span: "",
+    },
+    {
+        id: "img-6",
+        src: "/images/gallery-02.webp",
+        alt: "Chesterfield Lounge-Bereich",
+        span: "",
+    },
+    {
+        id: "img-7",
+        src: "/images/gallery-07.webp",
+        alt: "Tropischer Cocktail mit Pizza",
+        span: "",
+    },
+];
+---
+
+<section id="impressionen" class="py-24 px-6 bg-black border-t border-white/5">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl uppercase tracking-tighter mb-4">
+                Impressionen
+            </h2>
+            <div class="h-1 w-20 bg-secondary mx-auto"></div>
+        </div>
+
+        <div
+            id="gallery-grid"
+            class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3"
+        >
+            <!-- Rendered by client script -->
+        </div>
+    </div>
+</section>
+
+<!-- Lightbox -->
+<div
+    id="lightbox"
+    class="fixed inset-0 z-[100] bg-black/95 hidden items-center justify-center p-6 cursor-pointer"
+>
+    <button
+        id="lightbox-close"
+        class="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-10"
+        aria-label="Schließen"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+        </svg>
+    </button>
+    <button
+        id="lightbox-prev"
+        class="absolute left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-10"
+        aria-label="Vorheriges Bild"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="m15 18-6-6 6-6"></path>
+        </svg>
+    </button>
+    <button
+        id="lightbox-next"
+        class="absolute right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-10"
+        aria-label="Nächstes Bild"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        >
+            <path d="m9 18 6-6-6-6"></path>
+        </svg>
+    </button>
+    <img
+        id="lightbox-img"
+        src=""
+        alt=""
+        class="max-w-full max-h-[85vh] object-contain"
+    />
+</div>
+
+<script define:vars={{ defaultImages }}>
+    const grid = document.getElementById("gallery-grid");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
+    const lightboxClose = document.getElementById("lightbox-close");
+    const lightboxPrev = document.getElementById("lightbox-prev");
+    const lightboxNext = document.getElementById("lightbox-next");
+
+    // Load images from localStorage or use defaults
+    const saved = localStorage.getItem("caruso_gallery_images");
+    const images = saved ? JSON.parse(saved) : defaultImages;
+
+    let currentIndex = 0;
+
+    // Render gallery
+    if (grid) {
+        grid.innerHTML = images
+            .map(
+                (img, i) => `
+            <div class="gallery-item overflow-hidden cursor-pointer group relative ${
+                img.span || ""
+            }" data-index="${i}">
+                <img
+                    src="${img.src}"
+                    alt="${img.alt}"
+                    class="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                />
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500 flex items-end">
+                    <p class="text-white text-[10px] uppercase tracking-widest font-bold px-4 pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-y-4 group-hover:translate-y-0">
+                        ${img.alt}
+                    </p>
+                </div>
+            </div>
+        `
+            )
+            .join("");
+
+        // Attach click handlers
+        grid.querySelectorAll(".gallery-item").forEach((item, i) => {
+            item.addEventListener("click", () => openLightbox(i));
+        });
+    }
+
+    function openLightbox(index) {
+        currentIndex = index;
+        if (lightbox && lightboxImg) {
+            lightboxImg.src = images[index].src;
+            lightboxImg.alt = images[index].alt;
+            lightbox.classList.remove("hidden");
+            lightbox.classList.add("flex");
+            document.body.style.overflow = "hidden";
+        }
+    }
+
+    function closeLightbox() {
+        if (lightbox) {
+            lightbox.classList.add("hidden");
+            lightbox.classList.remove("flex");
+            document.body.style.overflow = "";
+        }
+    }
+
+    function navigate(direction) {
+        currentIndex =
+            (currentIndex + direction + images.length) % images.length;
+        if (lightboxImg) {
+            lightboxImg.src = images[currentIndex].src;
+            lightboxImg.alt = images[currentIndex].alt;
+        }
+    }
+
+    lightboxClose?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeLightbox();
+    });
+    lightboxPrev?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        navigate(-1);
+    });
+    lightboxNext?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        navigate(1);
+    });
+    lightbox?.addEventListener("click", (e) => {
+        if (e.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (!lightbox?.classList.contains("flex")) return;
+        if (e.key === "Escape") closeLightbox();
+        if (e.key === "ArrowLeft") navigate(-1);
+        if (e.key === "ArrowRight") navigate(1);
+    });
+</script>
