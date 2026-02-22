@@ -9,7 +9,8 @@ try {
         is_special TINYINT(1) DEFAULT 0,
         bg_color VARCHAR(50) DEFAULT '#000000',
         badge_text VARCHAR(100) DEFAULT 'Spezial',
-        order_index INT DEFAULT 0
+        order_index INT DEFAULT 0,
+        is_hidden TINYINT(1) DEFAULT 0
     )");
 
     // Subcategories Table
@@ -76,8 +77,14 @@ try {
     try {
         $pdo->exec("ALTER TABLE gallery_images ADD COLUMN description VARCHAR(255) DEFAULT '' AFTER alt");
     }
-    catch (Exception $e) {
-    // Column likely already exists, ignore
+    catch (Exception $e) { /* ignore */
+    }
+
+    // Migration: Add is_hidden column to categories if it doesn't exist
+    try {
+        $pdo->exec("ALTER TABLE categories ADD COLUMN is_hidden TINYINT(1) DEFAULT 0");
+    }
+    catch (Exception $e) { /* ignore */
     }
 
     // Seed default data if empty

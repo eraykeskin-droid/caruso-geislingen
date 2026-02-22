@@ -6,11 +6,13 @@ import CookieBanner from "../components/CookieBanner.astro";
 interface Props {
 	title: string;
 	description?: string;
+	showBackToTop?: boolean;
 }
 
 const {
 	title,
 	description = "Café Caruso – Shisha Bar & Lounge in Geislingen an der Steige",
+	showBackToTop = true,
 } = Astro.props;
 ---
 
@@ -53,7 +55,7 @@ const {
 	<body>
 		<slot />
 
-		<BackToTop />
+		{showBackToTop && <BackToTop />}
 		<CookieBanner />
 
 		<script>

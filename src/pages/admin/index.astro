@@ -4,7 +4,7 @@ import AdminAuth from "../../components/admin/AdminAuth";
 import AdminDashboard from "../../components/admin/AdminDashboard";
 ---
 
-<Layout title="Admin Panel">
+<Layout title="Admin Panel" showBackToTop={false}>
     <AdminAuth client:only="react">
         <AdminDashboard client:only="react" />
     </AdminAuth>

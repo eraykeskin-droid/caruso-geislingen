@@ -21,13 +21,13 @@ try {
     foreach ($input as $index => $cat) {
         // Handle category
         if (isset($cat['id']) && !str_starts_with($cat['id'], 'cat-') && in_array($cat['id'], $existingCatIds)) {
-            $stmt = $pdo->prepare("UPDATE categories SET name = ?, is_special = ?, bg_color = ?, badge_text = ?, order_index = ? WHERE id = ?");
-            $stmt->execute([$cat['name'], !empty($cat['is_special']) ? 1 : 0, $cat['bg_color'] ?? '#000000', $cat['badge_text'] ?? 'Spezial', $index, $cat['id']]);
+            $stmt = $pdo->prepare("UPDATE categories SET name = ?, is_special = ?, bg_color = ?, badge_text = ?, order_index = ?, is_hidden = ? WHERE id = ?");
+            $stmt->execute([$cat['name'], !empty($cat['is_special']) ? 1 : 0, $cat['bg_color'] ?? '#000000', $cat['badge_text'] ?? 'Spezial', $index, !empty($cat['is_hidden']) ? 1 : 0, $cat['id']]);
             $catId = $cat['id'];
         }
         else {
-            $stmt = $pdo->prepare("INSERT INTO categories (name, is_special, bg_color, badge_text, order_index) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$cat['name'], !empty($cat['is_special']) ? 1 : 0, $cat['bg_color'] ?? '#000000', $cat['badge_text'] ?? 'Spezial', $index]);
+            $stmt = $pdo->prepare("INSERT INTO categories (name, is_special, bg_color, badge_text, order_index, is_hidden) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$cat['name'], !empty($cat['is_special']) ? 1 : 0, $cat['bg_color'] ?? '#000000', $cat['badge_text'] ?? 'Spezial', $index, !empty($cat['is_hidden']) ? 1 : 0]);
             $catId = $pdo->lastInsertId();
         }
         $incomingCatIds[] = (int)$catId;
