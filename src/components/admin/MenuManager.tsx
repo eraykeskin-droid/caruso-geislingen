@@ -416,8 +416,7 @@ const MenuManager = () => {
                 </div>
             )}
 
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-widest italic border-l-4 border-secondary pl-4">Verwaltung</h2>
+            <div className="flex justify-end items-center mb-6">
                 <div className="flex items-center gap-2">
                     {categories.length > 0 && (
                         <button
