@@ -8,13 +8,23 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
-$password = $input['password'] ?? '';
+$password = isset($input['password']) ? trim($input['password']) : '';
 
-if ($password === 'Caruso2024!') {
+// Debug logging (will be in PHP error log)
+// error_log("Login attempt with password: " . $password);
+
+if ($password === 'Luca2022!') {
     $_SESSION['admin_logged_in'] = true;
-    echo json_encode(['success' => true]);
+    $_SESSION['admin_role'] = 'admin';
+    echo json_encode(['success' => true, 'role' => 'admin']);
+}
+else if ($password === 'Caruso2022!') {
+    $_SESSION['admin_logged_in'] = true;
+    $_SESSION['admin_role'] = 'staff';
+    echo json_encode(['success' => true, 'role' => 'staff']);
 }
 else {
+    // error_log("Login failed for: " . $password);
     echo json_encode(['success' => false, 'error' => 'Falsches Passwort']);
 }
 ?>

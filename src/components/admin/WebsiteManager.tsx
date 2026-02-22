@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Image, Trash2, Edit2, Plus, Save, X, MapPin, Phone, Mail, AtSign, GripVertical } from 'lucide-react';
+import { Clock, Image, Trash2, Edit2, Plus, Save, X, MapPin, Phone, Mail, AtSign, GripVertical, AlertCircle } from 'lucide-react';
 import {
     DndContext,
     closestCenter,
@@ -125,28 +125,28 @@ const SortableGalleryImage = ({ img, onEdit, onToggleSpan, onDelete, isEditing, 
                 </div>
 
                 {/* Overlay Controls */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/70 transition-all flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                    <div className="flex gap-2">
+                <div className="absolute inset-0 bg-black/40 sm:bg-black/0 sm:group-hover:bg-black/70 transition-all flex flex-col items-center justify-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+                    <div className="flex gap-2 sm:gap-1.5">
                         <button
                             onClick={() => onEdit(img.id)}
-                            className="p-2 bg-white/10 text-white hover:bg-secondary hover:text-black transition-all"
+                            className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center bg-white/10 text-white hover:bg-secondary hover:text-black transition-all shadow-lg sm:shadow-none"
                             title="Alt-Text bearbeiten"
                         >
-                            <Edit2 size={14} />
+                            <Edit2 size={16} />
                         </button>
                         <button
                             onClick={() => onToggleSpan(img.id)}
-                            className={`p-2 text-white transition-all ${img.span ? 'bg-secondary/30 hover:bg-secondary hover:text-black' : 'bg-white/10 hover:bg-white/20'}`}
+                            className={`w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center text-white transition-all shadow-lg sm:shadow-none ${img.span ? 'bg-secondary/30 hover:bg-secondary hover:text-black' : 'bg-white/10 hover:bg-white/20'}`}
                             title={img.span ? "Normal (1 Spalte)" : "Breit (2 Spalten)"}
                         >
-                            <span className="text-[10px] font-bold">{img.span ? "2x" : "1x"}</span>
+                            <span className="text-xs sm:text-[10px] font-bold">{img.span ? "2x" : "1x"}</span>
                         </button>
                         <button
                             onClick={() => onDelete(img.id)}
-                            className="p-2 bg-white/10 text-white hover:bg-red-500 transition-all"
+                            className="w-11 h-11 sm:w-8 sm:h-8 flex items-center justify-center bg-white/10 text-white hover:bg-red-500 transition-all shadow-lg sm:shadow-none"
                             title="Bild löschen"
                         >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 </div>
@@ -213,7 +213,12 @@ const WebsiteManager = () => {
     const [images, setImages] = useState<GalleryImage[]>(defaultImages);
     const [contact, setContact] = useState<ContactInfo>(defaultContact);
     const [editingDay, setEditingDay] = useState<number | null>(null);
-    const [editingImage, setEditingImage] = useState<string | null>(null);
+    const [editingImageId, setEditingImageId] = useState<string | null>(null);
+    const [confirmModal, setConfirmModal] = useState<{
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    } | null>(null);
     const [editingContactField, setEditingContactField] = useState<keyof ContactInfo | null>(null);
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -338,7 +343,7 @@ const WebsiteManager = () => {
             return img;
         });
         setImages(updated);
-        setEditingImage(null);
+        setEditingImageId(null);
     };
 
     const toggleImageSpan = (id: string) => {
@@ -354,22 +359,30 @@ const WebsiteManager = () => {
     };
 
     const deleteImage = async (id: string) => {
-        if (!confirm('Bild wirklich aus der Galerie entfernen?')) return;
-
-        setImages(images.filter(img => img.id !== id));
-        try {
-            const res = await fetch('/api/save-website-data.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'delete_image', id })
-            });
-            const data = await res.json();
-            if (data.success) flashSave();
-        } catch (err) {
-            console.error('Delete failed:', err);
-        }
+        setConfirmModal({
+            title: 'Bild löschen',
+            message: 'Möchten Sie dieses Bild wirklich aus der Galerie entfernen?',
+            onConfirm: async () => {
+                setSaving(true);
+                setConfirmModal(null);
+                try {
+                    const response = await fetch('/api/delete-gallery-image.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        setImages(images.filter(img => img.id !== id));
+                    }
+                } catch (error) {
+                    console.error('Error deleting image:', error);
+                } finally {
+                    setSaving(false);
+                }
+            }
+        });
     };
-
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -421,7 +434,7 @@ const WebsiteManager = () => {
                 {/* Opening Hours */}
                 <section>
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
+                        <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
                             <Clock size={18} className="text-secondary" />
                             Öffnungszeiten
                         </h2>
@@ -480,7 +493,7 @@ const WebsiteManager = () => {
                 {/* Contact Info */}
                 <section>
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
+                        <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
                             <MapPin size={18} className="text-secondary" />
                             Kontakt & Adresse
                         </h2>
@@ -552,9 +565,9 @@ const WebsiteManager = () => {
             {/* Gallery */}
             <section>
                 <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
+                    <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-widest border-l-4 border-secondary pl-4 flex items-center gap-3">
                         <Image size={18} className="text-secondary" />
-                        Bildergalerie
+                        Impressionen
                     </h2>
                     <div>
                         <input
@@ -567,9 +580,10 @@ const WebsiteManager = () => {
                         />
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-2 px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors rounded-none shadow-lg"
+                            className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-secondary text-black text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-colors rounded-none shadow-lg"
                         >
-                            <Plus size={14} /> Bild hochladen
+                            <Plus size={14} />
+                            <span className="hidden sm:inline">Bild hochladen</span>
                         </button>
                     </div>
                 </div>
@@ -588,18 +602,50 @@ const WebsiteManager = () => {
                                 <SortableGalleryImage
                                     key={img.id}
                                     img={img}
-                                    onEdit={setEditingImage}
+                                    onEdit={setEditingImageId}
                                     onToggleSpan={toggleImageSpan}
                                     onDelete={deleteImage}
-                                    isEditing={editingImage === img.id}
+                                    isEditing={editingImageId === img.id}
                                     onEditMetadata={updateImageFields}
-                                    onCancelEdit={() => setEditingImage(null)}
+                                    onCancelEdit={() => setEditingImageId(null)}
                                 />
                             ))}
                         </div>
                     </SortableContext>
                 </DndContext>
             </section>
+
+            {/* Custom Confirm Modal */}
+            {confirmModal && (
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setConfirmModal(null)} />
+                    <div className="bg-black border border-white/10 p-6 sm:p-8 w-full max-w-sm relative shadow-2xl">
+                        <div className="flex flex-col items-center text-center gap-4">
+                            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center">
+                                <AlertCircle size={32} className="text-red-500" />
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="text-white font-bold uppercase tracking-widest text-lg">{confirmModal.title}</h3>
+                                <p className="text-gray-400 text-xs leading-relaxed">{confirmModal.message}</p>
+                            </div>
+                            <div className="flex gap-3 w-full mt-4">
+                                <button
+                                    onClick={() => setConfirmModal(null)}
+                                    className="flex-1 py-3 bg-white/5 text-gray-400 border border-white/10 font-bold uppercase tracking-widest text-[10px] rounded hover:bg-white/10 hover:text-white transition-all cursor-pointer"
+                                >
+                                    Abbrechen
+                                </button>
+                                <button
+                                    onClick={confirmModal.onConfirm}
+                                    className="flex-1 py-3 bg-red-500 text-white font-bold uppercase tracking-widest text-[10px] rounded hover:bg-red-600 transition-all cursor-pointer"
+                                >
+                                    Löschen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

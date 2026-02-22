@@ -1,6 +1,8 @@
 <?php
 // save-reservations.php
 header('Content-Type: application/json');
+require_once 'auth-helper.php';
+requireLogin(['admin', 'staff']);
 require_once 'db.php';
 
 $input = json_decode(file_get_contents('php://input'), true);
@@ -19,14 +21,21 @@ try {
     $incomingIds = [];
 
     // For bulk save, just loop through and UPDATE all given records
+    require_once 'mail.php';
     foreach ($input as $res) {
         if (!empty($res['id'])) {
             $incomingIds[] = $res['id'];
 
             if (in_array($res['id'], $existingIds)) {
-                $stmt = $pdo->prepare("UPDATE reservations SET status = ?, name = ?, email = ?, phone = ?, guests = ?, date = ?, time = ?, comment = ? WHERE id = ?");
+                // Fetch current status to detect change
+                $stmt = $pdo->prepare("SELECT status FROM reservations WHERE id = ?");
+                $stmt->execute([$res['id']]);
+                $oldStatus = $stmt->fetchColumn();
+
+                $stmt = $pdo->prepare("UPDATE reservations SET status = ?, rejection_reason = ?, name = ?, email = ?, phone = ?, guests = ?, date = ?, time = ?, comment = ? WHERE id = ?");
                 $stmt->execute([
                     $res['status'],
+                    $res['rejection_reason'] ?? null,
                     $res['name'],
                     $res['email'],
                     $res['phone'],
@@ -36,6 +45,16 @@ try {
                     $res['comment'] ?? '',
                     $res['id']
                 ]);
+
+                // If status changed to confirmed/rejected, send mail
+                if ($oldStatus !== $res['status']) {
+                    if ($res['status'] === 'confirmed') {
+                        sendReservationMail($res, 'CUSTOMER_CONFIRMED');
+                    }
+                    else if ($res['status'] === 'rejected') {
+                        sendReservationMail($res, 'CUSTOMER_REJECTED');
+                    }
+                }
             }
         }
     }

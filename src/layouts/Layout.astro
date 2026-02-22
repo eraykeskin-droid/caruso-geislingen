@@ -1,18 +1,22 @@
 ---
 import "../styles/global.css";
-import BackToTop from "../components/BackToTop.astro";
 import CookieBanner from "../components/CookieBanner.astro";
+import Footer from "../components/Footer.astro";
 
 interface Props {
 	title: string;
 	description?: string;
-	showBackToTop?: boolean;
+	maxWidth?: string;
+	showFooterLinks?: boolean;
+	showFooterCredits?: boolean;
 }
 
 const {
 	title,
 	description = "Café Caruso – Shisha Bar & Lounge in Geislingen an der Steige",
-	showBackToTop = true,
+	maxWidth,
+	showFooterLinks = true,
+	showFooterCredits = true,
 } = Astro.props;
 ---
 
@@ -54,8 +58,12 @@ const {
 	</head>
 	<body>
 		<slot />
+		<Footer
+			maxWidth={maxWidth}
+			showLinks={showFooterLinks}
+			showCredits={showFooterCredits}
+		/>
 
-		{showBackToTop && <BackToTop />}
 		<CookieBanner />
 
 		<script>

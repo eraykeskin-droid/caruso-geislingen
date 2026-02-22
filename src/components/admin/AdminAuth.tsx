@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
+
+// Create a context for auth data
+const AuthContext = createContext<{ role: 'admin' | 'staff' | null, logout: () => void }>({ role: null, logout: () => { } });
+export const useAuth = () => useContext(AuthContext);
 
 const AdminAuth = ({ children }: { children: React.ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+    const [userRole, setUserRole] = useState<'admin' | 'staff' | null>(null);
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
@@ -11,8 +16,10 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
                 const res = await fetch('/api/check-auth.php');
                 const data = await res.json();
                 setIsLoggedIn(data.logged_in);
+                setUserRole(data.role || null);
             } catch (err) {
                 setIsLoggedIn(false);
+                setUserRole(null);
             }
         };
         checkAuth();
@@ -29,6 +36,7 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
             const data = await res.json();
             if (data.success) {
                 setIsLoggedIn(true);
+                setUserRole(data.role || null);
                 setError('');
             } else {
                 setError(data.error || 'Login fehlgeschlagen');
@@ -41,6 +49,7 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
     const handleLogout = async () => {
         await fetch('/api/logout.php');
         setIsLoggedIn(false);
+        setUserRole(null);
     };
 
     if (isLoggedIn === null) return <div className="min-h-screen bg-black flex items-center justify-center text-secondary">Lade...</div>;
@@ -83,21 +92,9 @@ const AdminAuth = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            <nav className="border-b border-white/5 bg-black sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <img src="/images/caruso-logo-white.svg" alt="Logo" className="h-8" />
-                        <span className="text-xs uppercase tracking-widest text-secondary font-bold border-l border-white/10 pl-4 hidden md:block">Management</span>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="text-xs uppercase tracking-widest text-gray-500 hover:text-red-500 transition-colors"
-                    >
-                        Logout
-                    </button>
-                </div>
-            </nav>
-            {children}
+            <AuthContext.Provider value={{ role: userRole, logout: handleLogout }}>
+                {children}
+            </AuthContext.Provider>
         </div>
     );
 };

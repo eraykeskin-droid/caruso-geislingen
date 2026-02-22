@@ -66,7 +66,10 @@
                 <input type="hidden" id="guests" name="guests" required />
                 <div class="custom-dropdown relative" data-target="guests">
                     <div
-                        class="dropdown-trigger bg-black/50 border border-white/10 rounded-none px-4 py-3 text-sm cursor-pointer hover:border-secondary/50 transition-colors flex items-center justify-between"
+                        class="dropdown-trigger bg-black/50 border border-white/10 rounded-none px-4 py-3 text-sm cursor-pointer hover:border-secondary/50 focus:border-secondary focus:bg-secondary/5 transition-colors flex items-center justify-between outline-none"
+                        tabindex="0"
+                        role="button"
+                        aria-haspopup="listbox"
                     >
                         <span class="dropdown-text text-white/25"
                             >Wählen ...</span
@@ -152,154 +155,162 @@
                             class="dropdown-item px-4 py-2.5 text-sm text-gray-300 hover:bg-secondary/10 hover:text-white cursor-pointer transition-colors border-t border-white/5"
                             data-value="11"
                         >
-                            Mehr als 10 (bitte Info)
+                            Mehr als 10 (bitte Info in Bemerkung)
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Date -->
-            <div class="flex flex-col gap-2 md:col-span-2">
-                <label
-                    for="date"
-                    class="text-xs uppercase tracking-widest text-secondary font-bold"
-                    >Datum</label
-                >
-                <input type="hidden" id="date" name="date" required />
-                <div
-                    id="calendar-display"
-                    class="bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white cursor-pointer hover:border-secondary/50 transition-colors text-sm flex items-center justify-between"
-                >
-                    <span id="calendar-display-text" class="text-white/25"
-                        >Datum wählen ...</span
+            <!-- Date & Time -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:col-span-2">
+                <div class="flex flex-col gap-2">
+                    <label
+                        for="date"
+                        class="text-xs uppercase tracking-widest text-secondary font-bold"
+                        >Datum</label
                     >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="text-secondary"
-                        ><rect width="18" height="18" x="3" y="4" rx="2" ry="2"
-                        ></rect><line x1="16" x2="16" y1="2" y2="6"></line><line
-                            x1="8"
-                            x2="8"
-                            y1="2"
-                            y2="6"></line><line x1="3" x2="21" y1="10" y2="10"
-                        ></line>
-                    </svg>
-                </div>
-                <div
-                    id="calendar-picker"
-                    class="hidden bg-black border border-white/10 p-4 mt-1 select-none"
-                >
-                    <div class="flex items-center justify-between mb-4">
-                        <button
-                            type="button"
-                            id="cal-prev"
-                            class="p-1 text-gray-500 hover:text-secondary transition-colors"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                ><path d="m15 18-6-6 6-6"></path>
-                            </svg>
-                        </button>
-                        <span
-                            id="cal-month-year"
-                            class="text-xs uppercase tracking-widest text-white font-bold"
-                        ></span>
-                        <button
-                            type="button"
-                            id="cal-next"
-                            class="p-1 text-gray-500 hover:text-secondary transition-colors"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="18"
-                                height="18"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                ><path d="m9 18 6-6-6-6"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-7 gap-1 text-center mb-2">
-                        <span
-                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
-                            >Mo</span
-                        >
-                        <span
-                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
-                            >Di</span
-                        >
-                        <span
-                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
-                            >Mi</span
-                        >
-                        <span
-                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
-                            >Do</span
-                        >
-                        <span
-                            class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
-                            >Fr</span
-                        >
-                        <span
-                            class="text-[9px] uppercase tracking-wider text-secondary/60 font-bold"
-                            >Sa</span
-                        >
-                        <span
-                            class="text-[9px] uppercase tracking-wider text-secondary/60 font-bold"
-                            >So</span
-                        >
-                    </div>
-                    <div id="cal-days" class="grid grid-cols-7 gap-1"></div>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <label
-                    class="text-xs uppercase tracking-widest text-secondary font-bold"
-                    >Uhrzeit</label
-                >
-                <input type="hidden" id="time" name="time" required />
-                <div class="custom-dropdown relative" data-target="time">
+                    <input type="hidden" id="date" name="date" required />
                     <div
-                        class="dropdown-trigger bg-black/50 border border-white/10 rounded-none px-4 py-3 text-sm cursor-pointer hover:border-secondary/50 transition-colors flex items-center justify-between"
+                        id="calendar-display"
+                        class="bg-black/50 border border-white/10 rounded-none px-4 py-3 text-white cursor-pointer hover:border-secondary/50 focus:border-secondary focus:bg-secondary/5 transition-colors text-sm flex items-center justify-between outline-none"
+                        tabindex="0"
+                        role="button"
+                        aria-haspopup="dialog"
                     >
-                        <span class="dropdown-text text-white/25"
-                            >Zuerst Datum wählen ...</span
+                        <span id="calendar-display-text" class="text-white/25"
+                            >Datum wählen ...</span
                         >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
+                            width="16"
+                            height="16"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
                             stroke-width="2"
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            class="text-secondary transition-transform dropdown-chevron"
-                            ><path d="m6 9 6 6 6-6"></path>
+                            class="text-secondary"
+                            ><rect width="18" height="18" x="3" y="4" rx="2" ry="2"
+                            ></rect><line x1="16" x2="16" y1="2" y2="6"></line><line
+                                x1="8"
+                                x2="8"
+                                y1="2"
+                                y2="6"></line><line x1="3" x2="21" y1="10" y2="10"
+                        ></line>
                         </svg>
                     </div>
                     <div
-                        class="dropdown-menu hidden absolute z-50 left-0 right-0 mt-1 bg-black border border-white/10 max-h-52 overflow-y-auto"
+                        id="calendar-picker"
+                        class="hidden bg-black border border-white/10 p-4 mt-1 select-none"
                     >
-                        <!-- Populated by JS -->
+                        <div class="flex items-center justify-between mb-4">
+                            <button
+                                type="button"
+                                id="cal-prev"
+                                class="p-1 text-gray-500 hover:text-secondary transition-colors"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    ><path d="m15 18-6-6 6-6"></path>
+                                </svg>
+                            </button>
+                            <span
+                                id="cal-month-year"
+                                class="text-xs uppercase tracking-widest text-white font-bold"
+                            ></span>
+                            <button
+                                type="button"
+                                id="cal-next"
+                                class="p-1 text-gray-500 hover:text-secondary transition-colors"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    ><path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                            <span
+                                class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                                >Mo</span
+                            >
+                            <span
+                                class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                                >Di</span
+                            >
+                            <span
+                                class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                                >Mi</span
+                            >
+                            <span
+                                class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                                >Do</span
+                            >
+                            <span
+                                class="text-[9px] uppercase tracking-wider text-gray-600 font-bold"
+                                >Fr</span
+                            >
+                            <span
+                                class="text-[9px] uppercase tracking-wider text-secondary/60 font-bold"
+                                >Sa</span
+                            >
+                            <span
+                                class="text-[9px] uppercase tracking-wider text-secondary/60 font-bold"
+                                >So</span
+                            >
+                        </div>
+                        <div id="cal-days" class="grid grid-cols-7 gap-1"></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label
+                        class="text-xs uppercase tracking-widest text-secondary font-bold"
+                        >Uhrzeit</label
+                    >
+                    <input type="hidden" id="time" name="time" required />
+                    <div class="custom-dropdown relative" data-target="time">
+                        <div
+                            class="dropdown-trigger bg-black/50 border border-white/10 rounded-none px-4 py-3 text-sm cursor-pointer hover:border-secondary/50 focus:border-secondary focus:bg-secondary/5 transition-colors flex items-center justify-between outline-none"
+                            tabindex="0"
+                            role="button"
+                            aria-haspopup="listbox"
+                        >
+                            <span class="dropdown-text text-white/25"
+                                >Zuerst Datum wählen ...</span
+                            >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="text-secondary transition-transform dropdown-chevron"
+                                ><path d="m6 9 6 6 6-6"></path>
+                            </svg>
+                        </div>
+                        <div
+                            class="dropdown-menu hidden absolute z-50 left-0 right-0 mt-1 bg-black border border-white/10 max-h-52 overflow-y-auto"
+                        >
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -584,6 +595,38 @@
                 });
                 item.classList.add("bg-secondary/20", "text-secondary");
             });
+        });
+    });
+
+    // Accessibility: Keyboard Support for Custom Triggers
+    const accessibilityTriggers = document.querySelectorAll(
+        ".dropdown-trigger, #calendar-display"
+    );
+    accessibilityTriggers.forEach((trigger) => {
+        trigger.addEventListener("keydown", (e) => {
+            if (
+                (e as KeyboardEvent).key === "Enter" ||
+                (e as KeyboardEvent).key === " "
+            ) {
+                e.preventDefault();
+                (trigger as HTMLElement).click();
+            }
+            // Handle arrow key navigation for iOS keyboard
+            if (
+                (e as KeyboardEvent).key === "ArrowDown" ||
+                (e as KeyboardEvent).key === "ArrowUp"
+            ) {
+                e.preventDefault();
+                const allTriggers = Array.from(accessibilityTriggers);
+                const currentIndex = allTriggers.indexOf(trigger);
+                let nextIndex: number;
+                if ((e as KeyboardEvent).key === "ArrowDown") {
+                    nextIndex = (currentIndex + 1) % allTriggers.length;
+                } else {
+                    nextIndex = (currentIndex - 1 + allTriggers.length) % allTriggers.length;
+                }
+                (allTriggers[nextIndex] as HTMLElement).focus();
+            }
         });
     });
 

@@ -54,11 +54,18 @@ const defaultImages = [
             <div class="h-1 w-20 bg-secondary mx-auto"></div>
         </div>
 
-        <div
-            id="gallery-grid"
-            class="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3"
-        >
+        <div id="gallery-grid" class="flex flex-wrap gap-2 md:gap-3">
             <!-- Rendered by client script -->
+        </div>
+
+        <!-- Show More Button (Mobile only) -->
+        <div id="gallery-more-container" class="mt-12 text-center hidden">
+            <button
+                id="gallery-more-btn"
+                class="px-8 py-4 bg-white/5 border border-white/10 text-white text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-secondary hover:text-black hover:border-secondary transition-all cursor-pointer"
+            >
+                Mehr anzeigen
+            </button>
         </div>
     </div>
 </section>
@@ -70,13 +77,13 @@ const defaultImages = [
 >
     <button
         id="lightbox-close"
-        class="absolute top-4 right-4 md:top-6 md:right-6 text-white/50 hover:text-white transition-colors z-10 p-4"
+        class="absolute top-4 right-4 md:top-6 md:right-6 text-white/50 hover:text-white transition-all z-10 p-3 bg-black/60 backdrop-blur-md rounded-full border border-white/10"
         aria-label="Schließen"
     >
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -90,13 +97,13 @@ const defaultImages = [
     </button>
     <button
         id="lightbox-prev"
-        class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-10 p-4"
+        class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-all z-10 p-3 bg-black/60 backdrop-blur-md rounded-full border border-white/10"
         aria-label="Vorheriges Bild"
     >
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -109,13 +116,13 @@ const defaultImages = [
     </button>
     <button
         id="lightbox-next"
-        class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors z-10 p-4"
+        class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-all z-10 p-3 bg-black/60 backdrop-blur-md rounded-full border border-white/10"
         aria-label="Nächstes Bild"
     >
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="24"
+            height="24"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -130,11 +137,16 @@ const defaultImages = [
         id="lightbox-img"
         src=""
         alt=""
-        class="max-w-full max-h-[85vh] object-contain touch-none select-none pointer-events-none"
+        class="max-w-full max-h-[70vh] sm:max-h-[75vh] object-contain touch-none select-none pointer-events-none"
     />
     <div
         id="lightbox-caption"
-        class="absolute bottom-8 left-0 right-0 text-center text-white text-sm font-bold uppercase tracking-[0.2em] px-8 transition-opacity duration-300"
+        class="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 text-center text-white text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] px-6 py-3 bg-black/80 backdrop-blur-md rounded-full max-w-[80vw] transition-opacity duration-300 pointer-events-none"
+    >
+    </div>
+    <div
+        id="lightbox-pagination"
+        class="absolute top-6 left-1/2 -translate-x-1/2 text-center text-white/70 text-[10px] font-bold uppercase tracking-[0.3em] pointer-events-none px-4 py-2 bg-black/60 backdrop-blur-md rounded-full border border-white/10"
     >
     </div>
 </div>
@@ -147,10 +159,14 @@ const defaultImages = [
     const lightboxClose = document.getElementById("lightbox-close");
     const lightboxPrev = document.getElementById("lightbox-prev");
     const lightboxNext = document.getElementById("lightbox-next");
+    const lightboxPagination = document.getElementById("lightbox-pagination");
+    const moreBtnContainer = document.getElementById("gallery-more-container");
+    const moreBtn = document.getElementById("gallery-more-btn");
 
-    const BASE_URL = "https://neu.caruso-geislingen.de";
+    const BASE_URL = "https://caruso-geislingen.de";
     let images = defaultImages;
     let currentIndex = 0;
+    let isExpanded = false; // For mobile "Show More" functionality
 
     function getFullSrc(src) {
         if (!src) return "";
@@ -178,33 +194,63 @@ const defaultImages = [
 
     function renderGallery() {
         if (!grid) return;
-        grid.innerHTML = images
-            .map(
-                (img, i) => `
-            <div class="gallery-item overflow-hidden cursor-pointer group relative ${
-                img.span || ""
-            }" data-index="${i}">
-                <img
-                    src="${getFullSrc(img.src)}"
-                    alt="${img.alt}"
-                    class="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-110"
-                    loading="lazy"
-                />
-                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500 flex items-end">
-                    <p class="text-white text-[10px] uppercase tracking-widest font-bold px-4 pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-y-4 group-hover:translate-y-0">
-                        ${img.description || img.alt}
-                    </p>
-                </div>
-            </div>
-        `
-            )
+
+        const isDesktop = window.innerWidth >= 1024;
+        const limit = isDesktop ? 10 : 3;
+        const shouldLimit = !isExpanded && images.length > limit;
+        const displayImages = shouldLimit ? images.slice(0, limit) : images;
+
+        if (moreBtnContainer) {
+            moreBtnContainer.classList.toggle("hidden", !shouldLimit);
+        }
+
+        grid.innerHTML = displayImages
+            .map((img, i) => {
+                const spanClass =
+                    img.span === "col-span-2"
+                        ? "flex-[1_0_100%] md:flex-[1_0_60%]"
+                        : "flex-[1_0_45%] md:flex-[1_1_30%]";
+
+                return `
+                    <div class="gallery-item overflow-hidden cursor-pointer group relative ${spanClass}" data-index="${i}">
+                        <img
+                            src="${getFullSrc(img.src)}"
+                            alt="${img.alt}"
+                            class="w-full h-48 md:h-64 object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                        />
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500 flex items-end">
+                            <p class="text-white text-[10px] uppercase tracking-widest font-bold px-4 pb-6 sm:pb-8 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-y-4 group-hover:translate-y-0">
+                                ${img.description || img.alt}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            })
             .join("");
 
         // Attach click handlers
-        grid.querySelectorAll(".gallery-item").forEach((item, i) => {
-            item.addEventListener("click", () => openLightbox(i));
+        grid.querySelectorAll(".gallery-item").forEach((item) => {
+            const index = parseInt(item.getAttribute("data-index") || "0");
+            item.addEventListener("click", () => openLightbox(index));
         });
     }
+
+    moreBtn?.addEventListener("click", () => {
+        openLightbox(0);
+    });
+
+    // Re-render on resize to handle mobile limit correctly, but ONLY on width change
+    // to prevent flickering on mobile when the URL bar shows/hides on scroll.
+    let resizeTimer;
+    let lastWidth = window.innerWidth;
+    window.addEventListener("resize", () => {
+        if (window.innerWidth !== lastWidth) {
+            lastWidth = window.innerWidth;
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(renderGallery, 100);
+        }
+    });
 
     let isAnimating = false;
 
@@ -214,8 +260,14 @@ const defaultImages = [
             const img = images[index];
             lightboxImg.src = getFullSrc(img.src);
             lightboxImg.alt = img.alt;
+
             if (lightboxCaption)
                 lightboxCaption.textContent = img.description || img.alt;
+
+            if (lightboxPagination)
+                lightboxPagination.textContent = `${currentIndex + 1} / ${
+                    images.length
+                }`;
 
             lightboxImg.style.transition = "none";
             lightboxImg.style.transform = "translate3d(0, 0, 0) scale(0.9)";
@@ -282,6 +334,10 @@ const defaultImages = [
             lightboxImg.alt = img.alt;
             if (lightboxCaption)
                 lightboxCaption.textContent = img.description || img.alt;
+            if (lightboxPagination)
+                lightboxPagination.textContent = `${currentIndex + 1} / ${
+                    images.length
+                }`;
 
             lightboxImg.style.transition = "none";
             lightboxImg.style.transform = `translate3d(${

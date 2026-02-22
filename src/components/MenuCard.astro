@@ -4,35 +4,42 @@ interface Props {
     price: string | number;
     unit?: string;
     info?: string;
+    allergens?: string;
 }
 
-const { name, price, unit, info } = Astro.props;
+const { name, price, unit, info, allergens } = Astro.props;
 
 const formattedPrice =
     typeof price === "number" ? price.toFixed(2).replace(".", ",") : price;
+const hasDetails = info || allergens;
 ---
 
 <div
-    class="menu-item group flex flex-col gap-1 pb-6 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors rounded-lg"
+    class="menu-item group flex flex-col pb-6 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors rounded-lg"
 >
-    <div class="flex justify-between items-baseline gap-4">
+    <div class="flex justify-between items-center gap-4">
         <h3
-            class="text-white text-lg font-medium group-hover:text-secondary transition-colors uppercase tracking-wide"
+            class="text-white text-lg font-medium group-hover:text-secondary transition-colors uppercase tracking-wide leading-none"
         >
             {name}
         </h3>
         <div
-            class="flex items-baseline gap-1 text-secondary font-bold whitespace-nowrap"
+            class="flex items-center gap-2 text-secondary font-bold whitespace-nowrap leading-none"
         >
             <span>{formattedPrice}</span>
             <span class="text-xs">€</span>
+            {unit && <span class="text-xs text-gray-500 font-normal italic uppercase tracking-wider ml-1">{unit}</span>}
         </div>
     </div>
 
-    <div class="flex justify-between items-center text-xs text-gray-500">
-        <span class="italic max-w-[80%]">{info || ""}</span>
-        <span class="uppercase tracking-widest">{unit || ""}</span>
-    </div>
+    {hasDetails && (
+        <div class="flex justify-between items-center text-xs text-gray-500">
+            <span class="italic max-w-[80%]">
+                {info}
+                {allergens && <span class="ml-1">{allergens}</span>}
+            </span>
+        </div>
+    )}
 </div>
 
 <style></style>

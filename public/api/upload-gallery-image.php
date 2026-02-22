@@ -1,4 +1,6 @@
 <?php
+require_once 'auth-helper.php';
+requireLogin(['admin']);
 require_once 'db.php';
 
 header('Content-Type: application/json');

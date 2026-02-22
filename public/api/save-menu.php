@@ -1,6 +1,8 @@
 <?php
 // save-menu.php
 header('Content-Type: application/json');
+require_once 'auth-helper.php';
+requireLogin(['admin']);
 require_once 'db.php';
 
 $input = json_decode(file_get_contents('php://input'), true);

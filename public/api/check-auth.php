@@ -3,6 +3,10 @@ session_start();
 header('Content-Type: application/json');
 
 $logged_in = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+$role = $_SESSION['admin_role'] ?? null;
 
-echo json_encode(['logged_in' => $logged_in]);
+echo json_encode([
+    'logged_in' => $logged_in,
+    'role' => $role
+]);
 ?>

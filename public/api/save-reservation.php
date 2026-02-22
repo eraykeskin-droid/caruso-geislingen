@@ -54,11 +54,16 @@ try {
         ]);
     }
 
-    // Trigger email notification
+    // Trigger email notifications
     require_once 'mail.php';
-    sendReservationMail($input, $isUpdate);
+    $adminMailSent = sendReservationMail($input, 'ADMIN_NOTIFICATION');
+    $customerMailSent = sendReservationMail($input, 'CUSTOMER_RECEIPT');
 
-    echo json_encode(['success' => true]);
+    echo json_encode([
+        'success' => true,
+        'mail_admin' => $adminMailSent,
+        'mail_customer' => $customerMailSent
+    ]);
 }
 catch (Exception $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
