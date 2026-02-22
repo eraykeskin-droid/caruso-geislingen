@@ -77,6 +77,9 @@ const MenuManager = () => {
                 const data = await res.json();
                 if (Array.isArray(data)) {
                     setCategories(data);
+                    // Default categories to collapsed
+                    const catIds = new Set<string>(data.map(c => `cat-${c.id}`));
+                    setCollapsedIds(catIds);
                     return;
                 }
             }
@@ -214,8 +217,8 @@ const MenuManager = () => {
         if (collapse) {
             const allIds = new Set<string>();
             categories.forEach(cat => {
-                allIds.add(cat.id);
-                cat.subcategories?.forEach(sub => allIds.add(sub.id));
+                allIds.add(`cat-${cat.id}`);
+                cat.subcategories?.forEach(sub => allIds.add(`sub-${sub.id}`));
             });
             setCollapsedIds(allIds);
         } else {
@@ -443,10 +446,10 @@ const MenuManager = () => {
                     <SortableCategory
                         key={category.id}
                         category={category}
-                        isCollapsed={collapsedIds.has(category.id)}
-                        onToggleCollapse={() => toggleCollapse(category.id)}
+                        isCollapsed={collapsedIds.has(`cat-${category.id}`)}
+                        onToggleCollapse={() => toggleCollapse(`cat-${category.id}`)}
                         collapsedIds={collapsedIds}
-                        onToggleSubCollapse={toggleCollapse}
+                        onToggleSubCollapse={(subId) => toggleCollapse(`sub-${subId}`)}
                         onEdit={() => setModal({ type: 'category', mode: 'edit', data: category })}
                         onEditItem={(item) => setModal({ type: 'item', mode: 'edit', data: { ...item, subcategory_id: '' }, parentId: category.id, grandParentId: category.id, subcategories: category.subcategories || [] })}
                         onDeleteItem={(itemId, subId?: string) => deleteItem(category.id, itemId, subId)}
@@ -1017,7 +1020,7 @@ const SortableCategory = ({
                                                 key={sub.id}
                                                 subcategory={sub}
                                                 categoryId={category.id}
-                                                isCollapsed={collapsedIds.has(sub.id)}
+                                                isCollapsed={collapsedIds.has(`sub-${sub.id}`)}
                                                 onToggleCollapse={() => onToggleSubCollapse(sub.id)}
                                                 onEdit={() => onEditSubcategory(sub)}
                                                 onEditItem={(item) => onEditSubItem(item, sub.id)}
