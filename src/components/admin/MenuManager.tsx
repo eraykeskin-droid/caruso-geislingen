@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { GripVertical, Plus, Edit2, Trash2, Palette, Star, X, Save, Eye, EyeOff, FolderPlus, FilePlus, ChevronDown, MoreHorizontal, Layers, FileText, ArrowUpDown, Copy, AlertCircle } from 'lucide-react';
+import { GripVertical, Plus, Edit2, Trash2, Palette, Star, X, Save, Eye, EyeOff, FolderPlus, FilePlus, ChevronDown, ChevronRight, MoreHorizontal, Layers, FileText, ArrowUpDown, Copy, AlertCircle } from 'lucide-react';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DndContext, closestCenter, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -45,6 +45,8 @@ const MenuManager = () => {
         subId?: string;
         items: { id: string, name: string }[];
     } | null>(null);
+
+    const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
 
     const [modal, setModal] = useState<{
         type: 'category' | 'subcategory' | 'item';
@@ -198,6 +200,29 @@ const MenuManager = () => {
         setCategories(newCategories);
         persistMenu(newCategories);
     };
+
+    const toggleCollapse = (id: string) => {
+        setCollapsedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
+    const toggleAll = (collapse: boolean) => {
+        if (collapse) {
+            const allIds = new Set<string>();
+            categories.forEach(cat => {
+                allIds.add(cat.id);
+                cat.subcategories?.forEach(sub => allIds.add(sub.id));
+            });
+            setCollapsedIds(allIds);
+        } else {
+            setCollapsedIds(new Set());
+        }
+    };
+
 
     const toggleCategoryVisibility = (id: string) => {
         const newCategories = categories.map(c =>
@@ -390,17 +415,27 @@ const MenuManager = () => {
 
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg sm:text-xl font-bold text-white uppercase tracking-widest italic border-l-4 border-secondary pl-4">Verwaltung</h2>
-                {categories.length > 1 && (
-                    <button
-                        onClick={() => setSortModal({
-                            type: 'categories',
-                            items: categories.map(c => ({ id: c.id, name: c.name }))
-                        })}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition-all text-[10px] font-bold uppercase tracking-widest cursor-pointer"
-                    >
-                        <ArrowUpDown size={14} /> Sortieren
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    {categories.length > 0 && (
+                        <button
+                            onClick={() => toggleAll(collapsedIds.size === 0)}
+                            className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition-all text-[10px] font-bold uppercase tracking-widest cursor-pointer"
+                        >
+                            {collapsedIds.size === 0 ? 'Alles einklappen' : 'Alles ausklappen'}
+                        </button>
+                    )}
+                    {categories.length > 1 && (
+                        <button
+                            onClick={() => setSortModal({
+                                type: 'categories',
+                                items: categories.map(c => ({ id: c.id, name: c.name }))
+                            })}
+                            className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition-all text-[10px] font-bold uppercase tracking-widest cursor-pointer"
+                        >
+                            <ArrowUpDown size={14} /> Sortieren
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="space-y-4">
@@ -408,6 +443,10 @@ const MenuManager = () => {
                     <SortableCategory
                         key={category.id}
                         category={category}
+                        isCollapsed={collapsedIds.has(category.id)}
+                        onToggleCollapse={() => toggleCollapse(category.id)}
+                        collapsedIds={collapsedIds}
+                        onToggleSubCollapse={toggleCollapse}
                         onEdit={() => setModal({ type: 'category', mode: 'edit', data: category })}
                         onEditItem={(item) => setModal({ type: 'item', mode: 'edit', data: { ...item, subcategory_id: '' }, parentId: category.id, grandParentId: category.id, subcategories: category.subcategories || [] })}
                         onDeleteItem={(itemId, subId?: string) => deleteItem(category.id, itemId, subId)}
@@ -894,9 +933,9 @@ const MenuManager = () => {
 };
 
 const SortableCategory = ({
-    category, onEdit, onEditItem, onDeleteItem, onEditSubcategory, onEditSubItem, onDeleteSubItem, onToggleVisibility, setModal, setSortModal
+    category, isCollapsed, onToggleCollapse, collapsedIds, onToggleSubCollapse, onEdit, onEditItem, onDeleteItem, onEditSubcategory, onEditSubItem, onDeleteSubItem, onToggleVisibility, setModal, setSortModal
 }: {
-    category: Category, onEdit: () => void, onEditItem: (i: MenuItem) => void, onDeleteItem: (id: string, subId?: string) => void, onEditSubcategory: (s: SubCategory) => void, onEditSubItem: (item: MenuItem, subId: string) => void, onDeleteSubItem: (itemId: string, subId: string) => void, onToggleVisibility: () => void, setModal: (modal: any) => void, setSortModal: (modal: any) => void
+    category: Category, isCollapsed: boolean, onToggleCollapse: () => void, collapsedIds: Set<string>, onToggleSubCollapse: (id: string) => void, onEdit: () => void, onEditItem: (i: MenuItem) => void, onDeleteItem: (id: string, subId?: string) => void, onEditSubcategory: (s: SubCategory) => void, onEditSubItem: (item: MenuItem, subId: string) => void, onDeleteSubItem: (itemId: string, subId: string) => void, onToggleVisibility: () => void, setModal: (modal: any) => void, setSortModal: (modal: any) => void
 }) => {
     const color = category.bg_color || '#ffe08a';
     const dynamicStyle = {
@@ -918,9 +957,17 @@ const SortableCategory = ({
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 min-w-0">
                         <div
                             className="flex items-center gap-2 sm:gap-3 min-w-0 cursor-pointer group-hover:text-secondary transition-colors flex-grow"
-                            onClick={onEdit}
                         >
-                            <span className="text-sm sm:text-xl font-bold uppercase tracking-tight leading-none text-white break-words group-hover:text-secondary transition-colors">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }}
+                                className="text-secondary hover:text-white transition-colors cursor-pointer shrink-0"
+                            >
+                                {isCollapsed ? <ChevronRight size={22} /> : <ChevronDown size={22} />}
+                            </button>
+                            <span
+                                onClick={onEdit}
+                                className="text-sm sm:text-xl font-bold uppercase tracking-tight leading-none text-white break-words group-hover:text-secondary transition-colors"
+                            >
                                 {category.name}
                             </span>
                             {!!category.is_special && (
@@ -960,53 +1007,57 @@ const SortableCategory = ({
                     </div>
 
                     {/* Content: Aligned flush with title, removed lines on mobile */}
-                    <div className="mt-2">
-                        <div className="space-y-4">
-                            {hasSubcategories && (
-                                <div className="space-y-4">
-                                    {category.subcategories?.map(sub => (
-                                        <SubCategoryBox
-                                            key={sub.id}
-                                            subcategory={sub}
-                                            categoryId={category.id}
-                                            onEdit={() => onEditSubcategory(sub)}
-                                            onEditItem={(item) => onEditSubItem(item, sub.id)}
-                                            onDeleteItem={(itemId) => onDeleteSubItem(itemId, sub.id)}
-                                        />
-                                    ))}
-                                </div>
-                            )}
+                    {!isCollapsed && (
+                        <div className="mt-2">
+                            <div className="space-y-4">
+                                {hasSubcategories && (
+                                    <div className="space-y-4">
+                                        {category.subcategories?.map(sub => (
+                                            <SubCategoryBox
+                                                key={sub.id}
+                                                subcategory={sub}
+                                                categoryId={category.id}
+                                                isCollapsed={collapsedIds.has(sub.id)}
+                                                onToggleCollapse={() => onToggleSubCollapse(sub.id)}
+                                                onEdit={() => onEditSubcategory(sub)}
+                                                onEditItem={(item) => onEditSubItem(item, sub.id)}
+                                                onDeleteItem={(itemId) => onDeleteSubItem(itemId, sub.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
 
-                            <div>
                                 <div>
-                                    {hasDirectItems && (
-                                        <div>
-                                            <div className="flex flex-col gap-2">
-                                                {category.items.map(item => (
-                                                    <SortableItem
-                                                        key={item.id}
-                                                        item={item}
-                                                        onEdit={() => onEditItem(item)}
-                                                    />
-                                                ))}
+                                    <div>
+                                        {hasDirectItems && (
+                                            <div>
+                                                <div className="flex flex-col gap-2">
+                                                    {category.items.map(item => (
+                                                        <SortableItem
+                                                            key={item.id}
+                                                            item={item}
+                                                            onEdit={() => onEditItem(item)}
+                                                        />
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
-                                    {!hasDirectItems && !hasSubcategories && (
-                                        <p className="text-[10px] text-gray-600 italic pt-2">Noch keine Artikel vorhanden.</p>
-                                    )}
+                                        )}
+                                        {!hasDirectItems && !hasSubcategories && (
+                                            <p className="text-[10px] text-gray-600 italic pt-2">Noch keine Artikel vorhanden.</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
     );
 };
 
-const SubCategoryBox = ({ subcategory, categoryId, onEdit, onEditItem, onDeleteItem }: {
-    subcategory: SubCategory, categoryId: string, onEdit: () => void, onEditItem: (i: MenuItem) => void, onDeleteItem: (id: string) => void
+const SubCategoryBox = ({ subcategory, categoryId, isCollapsed, onToggleCollapse, onEdit, onEditItem, onDeleteItem }: {
+    subcategory: SubCategory, categoryId: string, isCollapsed: boolean, onToggleCollapse: () => void, onEdit: () => void, onEditItem: (i: MenuItem) => void, onDeleteItem: (id: string) => void
 }) => {
     const hasItems = subcategory.items && subcategory.items.length > 0;
 
@@ -1016,11 +1067,21 @@ const SubCategoryBox = ({ subcategory, categoryId, onEdit, onEditItem, onDeleteI
 
                 <div className="flex-grow">
                     <div
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-2 mb-2 cursor-pointer group-hover/sub:text-secondary transition-colors"
-                        onClick={onEdit}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-2 mb-2 group-hover/sub:text-secondary transition-colors"
                     >
-                        <div className="flex items-center gap-2 pr-2 min-w-0">
-                            <span className="text-white font-bold text-sm uppercase tracking-wide break-words group-hover/sub:text-secondary transition-colors">{subcategory.name}</span>
+                        <div className="flex items-center gap-2 pr-2 min-w-0 flex-grow">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onToggleCollapse(); }}
+                                className="text-secondary hover:text-white transition-colors cursor-pointer shrink-0"
+                            >
+                                {isCollapsed ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
+                            </button>
+                            <span
+                                onClick={onEdit}
+                                className="text-white font-bold text-sm uppercase tracking-wide break-words group-hover/sub:text-secondary transition-colors cursor-pointer"
+                            >
+                                {subcategory.name}
+                            </span>
                             <div className="flex items-center gap-1.5 text-[9px] text-white/40 bg-white/5 px-2 py-1 rounded border border-white/10 w-fit shrink-0" title="Artikel">
                                 <FileText size={10} />
                                 <span>{subcategory.items?.length || 0}</span>
@@ -1028,25 +1089,27 @@ const SubCategoryBox = ({ subcategory, categoryId, onEdit, onEditItem, onDeleteI
                         </div>
                     </div>
 
-                    <div>
+                    {!isCollapsed && (
                         <div>
-                            {hasItems ? (
-                                <div className="pt-2">
-                                    <div className="flex flex-col gap-2">
-                                        {subcategory.items.map(item => (
-                                            <SortableItem
-                                                key={item.id}
-                                                item={item}
-                                                onEdit={() => onEditItem(item)}
-                                            />
-                                        ))}
+                            <div>
+                                {hasItems ? (
+                                    <div className="pt-2">
+                                        <div className="flex flex-col gap-2">
+                                            {subcategory.items.map(item => (
+                                                <SortableItem
+                                                    key={item.id}
+                                                    item={item}
+                                                    onEdit={() => onEditItem(item)}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <p className="text-[9px] text-gray-600 italic pt-2">Keine Artikel</p>
-                            )}
+                                ) : (
+                                    <p className="text-[9px] text-gray-600 italic pt-2">Keine Artikel</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </div>
