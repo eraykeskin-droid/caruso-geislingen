@@ -51,6 +51,58 @@ const {
 		<meta property="og:type" content="website" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
+
+		<!-- Structured Data (Schema.org) -->
+		<script type="application/ld+json" is:inline>
+			{
+				"@context": "https://schema.org",
+				"@graph": [
+					{
+						"@type": "WebSite",
+						"@id": "https://caruso-geislingen.de/#website",
+						"url": "https://caruso-geislingen.de/",
+						"name": "Café Caruso",
+						"publisher": {
+							"@id": "https://caruso-geislingen.de/#organization"
+						}
+					},
+					{
+						"@type": "BarOrPub",
+						"@id": "https://caruso-geislingen.de/#organization",
+						"name": "Café Caruso",
+						"url": "https://caruso-geislingen.de/",
+						"logo": "https://caruso-geislingen.de/images/caruso-logo-white.png",
+						"image": "https://caruso-geislingen.de/images/caruso-logo-white.png",
+						"address": {
+							"@type": "PostalAddress",
+							"streetAddress": "Hauptstraße 36",
+							"addressLocality": "Geislingen an der Steige",
+							"postalCode": "73312",
+							"addressCountry": "DE"
+						},
+						"telephone": "+4973319467928",
+						"priceRange": "$$"
+					},
+					{
+						"@type": "ItemList",
+						"itemListElement": [
+							{
+								"@type": "SiteNavigationElement",
+								"position": 1,
+								"name": "Getränkekarte",
+								"url": "https://caruso-geislingen.de/karte"
+							},
+							{
+								"@type": "SiteNavigationElement",
+								"position": 2,
+								"name": "Reservieren",
+								"url": "https://caruso-geislingen.de/reservieren"
+							}
+						]
+					}
+				]
+			}
+		</script>
 	</head>
 	<body>
 		<slot />
