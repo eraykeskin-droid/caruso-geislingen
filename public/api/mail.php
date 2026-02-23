@@ -305,7 +305,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                 $mail->Body = $htmlHeader . "
                     <h1 style='border-left-color: #ef4444; color: #ffffff;'>Abgelehnt</h1>
                     <p>Hallo $customerName,</p>
-                    <p>vielen Dank für deine Anfrage. Leider müssen wir dir mitteilen, dass wir deine Reservierung nicht annehmen können.</p>
+                    <p>deine Reservierung im $brandName wurde leider <b style='color:#ef4444'>abgelehnt</b>.</p>
                     
                     <div style='background-color: #1a1a1a; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.3); padding: 25px; margin: 30px 0;'>
                         <p class='detail-label' style='color:#ef4444;'>Grund der Ablehnung:</p>
