@@ -77,9 +77,13 @@ const MenuManager = () => {
                 const data = await res.json();
                 if (Array.isArray(data)) {
                     setCategories(data);
-                    // Default categories to collapsed
-                    const catIds = new Set<string>(data.map(c => `cat-${c.id}`));
-                    setCollapsedIds(catIds);
+                    // Default categories and subcategories to collapsed
+                    const allIds = new Set<string>();
+                    data.forEach(cat => {
+                        allIds.add(`cat-${cat.id}`);
+                        cat.subcategories?.forEach(sub => allIds.add(`sub-${sub.id}`));
+                    });
+                    setCollapsedIds(allIds);
                     return;
                 }
             }
