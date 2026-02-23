@@ -300,7 +300,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
 
             case 'CUSTOMER_REJECTED':
                 $mail->addAddress($customerEmail, $customerName);
-                $mail->Subject = "Information zu deiner Reservierung - $brandName";
+                $mail->Subject = "Reservierung abgelehnt - $brandName";
                 $reason = !empty($resData['rejection_reason']) ? $resData['rejection_reason'] : 'Leider sind wir zu diesem Zeitpunkt bereits ausgebucht.';
                 $mail->Body = $htmlHeader . "
                     <h1 style='border-left-color: #ef4444; color: #ffffff;'>Abgelehnt</h1>
