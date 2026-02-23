@@ -36,11 +36,11 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
         $stmt = $pdo->query("SELECT setting_key, setting_value FROM website_settings");
         $settings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-        $brandName = $settings['contact_name'] ?? 'Café Caruso Geislingen';
-        $street = $settings['contact_street'] ?? 'Hauptstraße 36';
-        $city = $settings['contact_city'] ?? '73312 Geislingen an der Steige';
-        $phone = $settings['contact_phone'] ?? '07331 9467928';
-        $email = $settings['contact_email'] ?? 'info@cafe-caruso.de';
+        $brandName = $settings['contact_name'];
+        $street = $settings['contact_street'];
+        $city = $settings['contact_city'];
+        $phone = $settings['contact_phone'];
+        $email = $settings['contact_email'];
 
         // --- SMTP SERVER SETTINGS --- //
         $mail->isSMTP();
