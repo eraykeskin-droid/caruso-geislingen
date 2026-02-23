@@ -67,10 +67,16 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
         $borderCol = 'rgba(255,255,255,0.1)';
 
         // --- Embedded Logo --- //
-        // Use local path for embedding
-        $logoPath = dirname(__DIR__) . '/images/caruso-logo-white.svg';
-        if (file_exists($logoPath)) {
-            $mail->addEmbeddedImage($logoPath, 'caruso_logo');
+        // Try PNG first (best for Gmail compatibility), fallback to SVG
+        $logoPathPng = dirname(__DIR__) . '/images/caruso-logo-white.png';
+        $logoPathSvg = dirname(__DIR__) . '/images/caruso-logo-white.svg';
+
+        if (file_exists($logoPathPng)) {
+            $mail->addEmbeddedImage($logoPathPng, 'caruso_logo');
+            $logoHtml = "<img src='cid:caruso_logo' alt='$brandName Logo'>";
+        }
+        elseif (file_exists($logoPathSvg)) {
+            $mail->addEmbeddedImage($logoPathSvg, 'caruso_logo');
             $logoHtml = "<img src='cid:caruso_logo' alt='$brandName Logo'>";
         }
         else {
@@ -346,39 +352,5 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
         error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
         return false;
     }
-}
-?>
-<tr>
-    <td class='detail-label'>Uhrzeit</td>
-</tr>
-<tr>
-    <td class='detail-value' style='color: #9ca3af; text-decoration: line-through;'>" . substr($resData['time'], 0, 5) .
-        " Uhr</td>
-</tr>
-<tr>
-    <td class='detail-label'>Gäste</td>
-</tr>
-<tr>
-    <td class='detail-value detail-value-last' style='color: #9ca3af; text-decoration: line-through;'>$guestDisplay</td>
-</tr>
-</table>
-</div>
-</div>
-
-<p>Wir hoffen, dich ein anderes Mal bei uns begrüßen zu dürfen!</p>
-<p>Beste Grüße,<br>Dein Caruso Team</p>
-" . $htmlFooter;
-break;
-}
-
-$mail->send();
-return true;
-}
-catch (Exception $e) {
-error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
-return false;
-}
-}
-??
 }
 ?>
