@@ -130,28 +130,27 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                         <!-- Container -->
                         <table width='100%' cellpadding='0' cellspacing='0' border='0' style='max-width: 600px; margin: 0 auto; background-color: $bgDark;'>
                             <tr>
-                                    <!-- Logo Section -->
-                                    <table width='100%' cellpadding='0' cellspacing='0' border='0'>
-                                        <tr>
-                                            <td align='center' style='padding-bottom: 40px;'>
-                                                <div class='logo'>
-                                                    $logoHtml
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    
+                                <td align='center' style='padding-bottom: 40px;'>
+                                    <div class='logo'>
+                                        $logoHtml
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align='left'>
                                     <div style='background-color: $cardBg !important; background: $cardBg; padding: 40px; border: 1px solid $borderCol; color: #ffffff;'>
         ";
 
         $htmlFooter = "
                                     </div>
-                                    <div class='footer'>
-                                        <b style='color: #ffffff;'>$brandName</b><br>
-                                        $street, $city<br>
-                                        <a href='tel:" . str_replace(' ', '', $phone) . "' style='color:#6b7280; text-decoration:none;'>$phone</a> | 
-                                        <a href='http://$_SERVER[HTTP_HOST]' style='color:#6b7280; text-decoration:none;'>$_SERVER[HTTP_HOST]</a>
-                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align='center' class='footer' style='padding-top: 40px;'>
+                                    <b style='color: #ffffff;'>$brandName</b><br>
+                                    $street, $city<br>
+                                    <a href='tel:" . str_replace(' ', '', $phone) . "' style='color:#6b7280; text-decoration:none;'>$phone</a> | 
+                                    <a href='http://$_SERVER[HTTP_HOST]' style='color:#6b7280; text-decoration:none;'>$_SERVER[HTTP_HOST]</a>
                                 </td>
                             </tr>
                         </table>
