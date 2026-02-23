@@ -112,7 +112,7 @@ try {
             ['contact_street', 'Hauptstraße 36'],
             ['contact_city', '73312 Geislingen an der Steige'],
             ['contact_phone', '07331 9467928'],
-            ['contact_email', 'info@cafe-caruso.de'],
+            ['contact_email', 'info@caruso-geislingen.de'],
             ['contact_instagram', 'cafecaruso_']
         ];
         $stmt = $pdo->prepare("INSERT INTO website_settings (setting_key, setting_value) VALUES (?, ?)");

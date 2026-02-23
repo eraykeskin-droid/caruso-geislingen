@@ -47,7 +47,7 @@ const defaultContact: ContactInfo = {
     street: 'Hauptstraße 36',
     city: '73312 Geislingen an der Steige',
     phone: '07331 9467928',
-    email: 'info@cafe-caruso.de',
+    email: 'info@caruso-geislingen.de',
     instagram: 'cafecaruso_',
 };
 

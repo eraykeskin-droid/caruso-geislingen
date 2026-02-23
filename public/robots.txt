@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cafe-caruso.de/sitemap-index.xml
+Sitemap: https://caruso-geislingen.de/sitemap-index.xml
