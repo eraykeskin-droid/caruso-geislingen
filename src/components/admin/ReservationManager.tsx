@@ -24,9 +24,14 @@ const ReservationManager = () => {
 
     useEffect(() => {
         loadReservations();
+        const interval = setInterval(() => {
+            loadReservations(true); // true = silent background refresh
+        }, 30000);
+        return () => clearInterval(interval);
     }, []);
 
-    const loadReservations = async () => {
+    const loadReservations = async (silent = false) => {
+        if (!silent) setLoading(true);
         try {
             const res = await fetch(`/api/get-reservations.php?t=${Date.now()}`);
             const data = await res.json();
@@ -36,7 +41,7 @@ const ReservationManager = () => {
         } catch (e) {
             console.error("Failed to load reservations", e);
         } finally {
-            setLoading(false);
+            if (!silent) setLoading(false);
         }
     };
 
