@@ -165,7 +165,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
         $outlookCal = "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject=$calTitle&startdt=$resData[date]T$resData[time]&enddt=$resData[date]T$calTimeEnd&body=$calDetails&location=$calLocation";
 
         // --- Helpers --- //
-        $guestDisplay = (int)$resData['guests'] >= 11 ? 'Mehr als 10 (siehe Bemerkung)' : $resData['guests'] . ' Personen';
+        $guestDisplay = (int)$resData['guests'] === 1 ? '1 Person' : ((int)$resData['guests'] >= 11 ? 'Mehr als 10 (siehe Bemerkung)' : $resData['guests'] . ' Personen');
         $prettyDate = formatGermanDate($resData['date']);
 
         switch ($type) {
@@ -224,7 +224,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                     <h1>Anfrage erhalten</h1>
                     <p>Hallo $customerName,</p>
                     <p>vielen Dank für deine Reservierungsanfrage im $brandName!</p>
-                    <p>Wir haben deine Reservierung erhalten und prüfen die Verfügbarkeit. Du hörst in Kürze von uns!</p>
+                    <p>Wir haben deine Reservierung erhalten und prüfen die Verfügbarkeit.<br>Du hörst in Kürze von uns!</p>
                     <div class='details-box'>
                         <table class='detail-table'>
                             <tr>
@@ -258,7 +258,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                 $mail->Body = $htmlHeader . "
                     <h1 style='border-left-color: #22c55e;'>Bestätigt!</h1>
                     <p>Gute Nachrichten, $customerName,</p>
-                    <p>deine Reservierung im $brandName wurde soeben <b style='color:#22c55e'>bestätigt</b>. Wir freuen uns auf deinen Besuch!</p>
+                    <p>deine Reservierung im $brandName wurde soeben <b style='color:#22c55e'>bestätigt</b>.<br>Wir freuen uns auf deinen Besuch!</p>
                     <div class='details-box' style='border-color: rgba(34, 197, 94, 0.3);'>
                         <table class='detail-table'>
                             <tr>
