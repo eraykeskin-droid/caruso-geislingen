@@ -104,8 +104,8 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                 body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; background-color: $bgDark !important; color: #ffffff !important; margin: 0; padding: 0; }
                 .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: $bgDark !important; }
                 .card { background-color: $cardBg !important; padding: 40px; border: 1px solid $borderCol; }
-                .logo { text-align: center; margin-bottom: 40px; }
-                .logo img { height: 60px; width: auto; }
+                .logo { text-align: center; }
+                .logo img { height: 60px; width: auto; display: block; margin: 0 auto; }
                 .gold { color: $brandGold; }
                 h1 { font-style: italic; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; font-size: 22px; border-left: 3px solid $brandGold; padding-left: 15px; margin-bottom: 30px; font-weight: 900; }
                 .details-box { background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 25px; margin: 30px 0; }
@@ -130,10 +130,17 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                         <!-- Container -->
                         <table width='100%' cellpadding='0' cellspacing='0' border='0' style='max-width: 600px; margin: 0 auto; background-color: $bgDark;'>
                             <tr>
-                                <td>
-                                    <div class='logo'>
-                                        $logoHtml
-                                    </div>
+                                    <!-- Logo Section -->
+                                    <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                                        <tr>
+                                            <td align='center' style='padding-bottom: 40px;'>
+                                                <div class='logo'>
+                                                    $logoHtml
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
                                     <div style='background-color: $cardBg !important; background: $cardBg; padding: 40px; border: 1px solid $borderCol; color: #ffffff;'>
         ";
 
