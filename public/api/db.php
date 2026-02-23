@@ -15,6 +15,10 @@ $options = [
 
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
+
+    // Automated Cleanup: Delete reservations older than 2 days past the reservation date
+    // Note: We use the 'date' column, not 'created_at'.
+    $pdo->exec("DELETE FROM reservations WHERE date < DATE_SUB(CURDATE(), INTERVAL 2 DAY)");
 }
 catch (\PDOException $e) {
     header('Content-Type: application/json');
