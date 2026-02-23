@@ -143,7 +143,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                                         <b style='color: #ffffff;'>$brandName</b><br>
                                         $street, $city<br>
                                         <a href='tel:" . str_replace(' ', '', $phone) . "' style='color:#6b7280; text-decoration:none;'>$phone</a> | 
-                                        <a href='https://caruso-geislingen.de' style='color:#6b7280; text-decoration:none;'>caruso-geislingen.de</a>
+                                        <a href='http://$_SERVER[HTTP_HOST]' style='color:#6b7280; text-decoration:none;'>$_SERVER[HTTP_HOST]</a>
                                     </div>
                                 </td>
                             </tr>
@@ -157,18 +157,19 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
 
         // --- Calendar Link Helpers --- //
         $calTitle = urlencode("Reservierung Café Caruso");
-        $calDate = str_replace('-', '', $resData['date']);
         $calTimeStart = str_replace(':', '', substr($resData['time'], 0, 5)) . "00";
         // End time + 2 hours
         $endH = (int)substr($resData['time'], 0, 2) + 2;
         $calTimeEnd = str_pad($endH, 2, "0", STR_PAD_LEFT) . substr($calTimeStart, 2, 4);
 
         $calDetails = urlencode("Danke für deine Reservierung im $brandName!\n\nDetails:\nName: {$resData['name']}\nGäste: {$resData['guests']}\n\nWir freuen uns auf deinen Besuch!");
+        $calTitle = urlencode("Reservierung: $brandName");
         $calLocation = urlencode("$street, $city");
+        $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
 
-        $appleCal = "https://caruso-geislingen.de/api/ics.php?date=" . urlencode($resData['date']) . "&time=" . urlencode($resData['time']) . "&name=" . urlencode($resData['name']) . "&guests=" . urlencode($resData['guests']) . "&address=$calLocation";
-        $googleCal = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=$calTitle&dates=$calDate" . "T" . "$calTimeStart/$calDate" . "T" . "$calTimeEnd&details=$calDetails&location=$calLocation";
-        $outlookCal = "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject=$calTitle&startdt=$resData[date]T$resData[time]&enddt=$resData[date]T$calTimeEnd&body=$calDetails&location=$calLocation";
+        $appleCal = "$baseUrl/api/ics.php?date=" . urlencode($resData['date']) . "&time=" . urlencode($resData['time']) . "&name=" . urlencode($resData['name']) . "&guests=" . urlencode($resData['guests']) . "&address=$calLocation";
+        $googleCal = "https://www.google.com/calendar/render?action=TEMPLATE&text=$calTitle&details=Deine+Reservierung+im+$brandName&location=$calLocation&dates=" . date('Ymd', strtotime($resData['date'])) . "T" . date('His', strtotime($resData['time'])) . "Z/" . date('Ymd', strtotime($resData['date'])) . "T" . date('His', strtotime($resData['time']) + 3600) . "Z";
+        $outlookCal = "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject=$calTitle&body=Deine+Reservierung+im+$brandName&location=$calLocation&startdt=" . $resData['date'] . "T" . $resData['time'] . "&enddt=" . $resData['date'] . "T" . date('H:i', strtotime($resData['time']) + 3600);
 
         // --- Helpers --- //
         $guestDisplay = (int)$resData['guests'] === 1 ? '1 Person' : ((int)$resData['guests'] >= 11 ? 'Mehr als 10 (siehe Bemerkung)' : $resData['guests'] . ' Personen');
@@ -218,7 +219,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                     </div>
                     " . ($resData['comment'] ? "<p style='font-size:12px; margin-top: 20px; border-left: 2px solid $brandGold; padding-left: 10px;'><b>Bemerkung:</b><br>{$resData['comment']}</p>" : "") . "
                     <div style='text-align:center; margin-top: 30px;'>
-                        <a href='https://caruso-geislingen.de/admin' class='btn'>Zum Admin-Panel</a>
+                        <a href='$baseUrl/admin' class='btn'>Zum Admin-Panel</a>
                     </div>
                 " . $htmlFooter;
                 break;

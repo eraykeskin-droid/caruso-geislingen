@@ -587,7 +587,7 @@ const RejectionModal = ({ reservation, onClose, onConfirm }: {
     onClose: () => void,
     onConfirm: (reason: string) => void
 }) => {
-    const [reason, setReason] = useState('Leider sind wir zu diesem Zeitpunkt bereits ausgebucht.');
+    const [reason, setReason] = useState('[REJECTION_REASON]');
 
     return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center px-6">

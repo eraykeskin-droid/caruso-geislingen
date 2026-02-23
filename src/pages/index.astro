@@ -87,12 +87,12 @@ import OpeningHours from "../components/OpeningHours.astro";
 			const contactContainer = document.getElementById("contact-info");
 
 			const defaults = {
-				name: "Café Caruso",
-				street: "Hauptstraße 36",
-				city: "73312 Geislingen an der Steige",
-				phone: "07331 9467928",
-				email: "info@caruso-geislingen.de",
-				instagram: "cafecaruso_",
+				name: "[NAME]",
+				street: "[STREET]",
+				city: "[CITY]",
+				phone: "[PHONE_NUMBER]",
+				email: "[EMAIL_ADDRESS]",
+				instagram: "",
 			};
 
 			async function loadContactInfo() {
@@ -112,7 +112,7 @@ import OpeningHours from "../components/OpeningHours.astro";
 				}
 			}
 
-			function renderContact(info) {
+			function renderContact(info: any) {
 				if (!contactContainer) return;
 				contactContainer.innerHTML = `
 					<div class="space-y-5">

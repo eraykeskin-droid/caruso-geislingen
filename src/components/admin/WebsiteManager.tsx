@@ -43,22 +43,22 @@ interface ContactInfo {
 }
 
 const defaultContact: ContactInfo = {
-    name: 'Café Caruso',
-    street: 'Hauptstraße 36',
-    city: '73312 Geislingen an der Steige',
-    phone: '07331 9467928',
-    email: 'info@caruso-geislingen.de',
-    instagram: 'cafecaruso_',
+    name: '[NAME]',
+    street: '[STREET]',
+    city: '[CITY]',
+    phone: '[PHONE_NUMBER]',
+    email: '[EMAIL_ADDRESS]',
+    instagram: '[INSTAGRAM_USERNAME]',
 };
 
 const defaultDays: DayHours[] = [
-    { name: "Montag", hours: "18:00 - 00:00 Uhr" },
-    { name: "Dienstag", hours: "18:00 - 00:00 Uhr" },
-    { name: "Mittwoch", hours: "18:00 - 00:00 Uhr" },
-    { name: "Donnerstag", hours: "18:00 - 00:00 Uhr" },
-    { name: "Freitag", hours: "18:00 - 03:00 Uhr" },
-    { name: "Samstag", hours: "14:00 - 03:00 Uhr" },
-    { name: "Sonntag", hours: "14:00 - 00:00 Uhr" },
+    { name: "Montag", hours: "[OPENING_HOURS]" },
+    { name: "Dienstag", hours: "[OPENING_HOURS]" },
+    { name: "Mittwoch", hours: "[OPENING_HOURS]" },
+    { name: "Donnerstag", hours: "[OPENING_HOURS]" },
+    { name: "Freitag", hours: "[OPENING_HOURS]" },
+    { name: "Samstag", hours: "[OPENING_HOURS]" },
+    { name: "Sonntag", hours: "[OPENING_HOURS]" },
 ];
 
 const defaultImages: GalleryImage[] = [

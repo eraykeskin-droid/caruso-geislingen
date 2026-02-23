@@ -108,12 +108,12 @@ try {
     $count = $pdo->query("SELECT COUNT(*) FROM website_settings")->fetchColumn();
     if ($count == 0) {
         $settings = [
-            ['contact_name', 'Café Caruso'],
-            ['contact_street', 'Hauptstraße 36'],
-            ['contact_city', '73312 Geislingen an der Steige'],
-            ['contact_phone', '07331 9467928'],
-            ['contact_email', 'info@caruso-geislingen.de'],
-            ['contact_instagram', 'cafecaruso_']
+            ['contact_name', '[NAME]'],
+            ['contact_street', '[STREET]'],
+            ['contact_city', '[CITY]'],
+            ['contact_phone', '[PHONE_NUMBER]'],
+            ['contact_email', '[EMAIL_ADDRESS]'],
+            ['contact_instagram', '[INSTAGRAM_USERNAME]']
         ];
         $stmt = $pdo->prepare("INSERT INTO website_settings (setting_key, setting_value) VALUES (?, ?)");
         foreach ($settings as $s) {
