@@ -119,10 +119,14 @@ textarea {
 [href^="tel:"],
 [href^="mailto:"],
 a[x-apple-data-detectors] {
-  color: inherit !important;
   text-decoration: none !important;
   font-size: inherit !important;
   font-family: inherit !important;
   font-weight: inherit !important;
   line-height: inherit !important;
+}
+
+[href^="tel:"]:hover,
+[href^="mailto:"]:hover {
+  color: var(--color-secondary) !important;
 }

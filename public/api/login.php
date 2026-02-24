@@ -18,7 +18,7 @@ if ($password === 'Luca2022!') {
     $_SESSION['admin_role'] = 'admin';
     echo json_encode(['success' => true, 'role' => 'admin']);
 }
-else if ($password === 'Caruso2022!') {
+else if ($password === 'lucabesterchef') {
     $_SESSION['admin_logged_in'] = true;
     $_SESSION['admin_role'] = 'staff';
     echo json_encode(['success' => true, 'role' => 'staff']);

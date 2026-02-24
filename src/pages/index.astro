@@ -128,30 +128,30 @@ import OpeningHours from "../components/OpeningHours.astro";
 								<p>${info.city || defaults.city}</p>
 							</div>
 						</div>
-						<div class="flex items-center gap-3 text-gray-400 text-sm">
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffe08a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+						<div class="flex items-center gap-3 text-sm">
 							<a href="tel:${(info.phone || defaults.phone).replace(
 								/\s/g,
 								""
-							)}" class="hover:text-secondary transition-colors">${
-					info.phone || defaults.phone
-				}</a>
+							)}" class="text-gray-400 hover:text-secondary transition-all flex items-center gap-3 group">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffe08a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+								${info.phone || defaults.phone}
+							</a>
 						</div>
-						<div class="flex items-center gap-3 text-gray-400 text-sm">
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffe08a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+						<div class="flex items-center gap-3 text-sm">
 							<a href="mailto:${
 								info.email || defaults.email
-							}" class="hover:text-secondary transition-colors">${
-					info.email || defaults.email
-				}</a>
+							}" class="text-gray-400 hover:text-secondary transition-all flex items-center gap-3 group">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffe08a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+								${info.email || defaults.email}
+							</a>
 						</div>
-						<div class="flex items-center gap-3 text-gray-400 text-sm">
-							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffe08a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+						<div class="flex items-center gap-3 text-sm">
 							<a href="https://www.instagram.com/${
 								info.instagram || defaults.instagram
-							}/" target="_blank" class="hover:text-secondary transition-colors">@${
-					info.instagram || defaults.instagram
-				}</a>
+							}/" target="_blank" class="text-gray-400 hover:text-secondary transition-all flex items-center gap-3 group">
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffe08a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+								@${info.instagram || defaults.instagram}
+							</a>
 						</div>
 					</div>
 
@@ -161,7 +161,7 @@ import OpeningHours from "../components/OpeningHours.astro";
 							target="_blank"
 							class="flex items-center justify-center gap-2 py-3 bg-white/[0.05] border border-white/10 text-[10px] uppercase tracking-widest font-bold text-gray-400 hover:text-secondary hover:border-secondary/30 transition-all"
 						>
-							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+							<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffe08a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
 							Route planen
 						</a>
 					</div>

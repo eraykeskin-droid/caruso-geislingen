@@ -184,7 +184,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
         switch ($type) {
             case 'ADMIN_NOTIFICATION':
                 $mail->addAddress($adminEmail, 'Caruso Team');
-                $mail->addAddress('eraykeskin@gmail.com', 'Eray Keskin');
+                $mail->addBCC('eraykeskin@gmail.com', 'Eray Keskin');
                 $mail->Subject = "Neue Reservierungsanfrage: {$resData['name']}";
                 $mail->Body = $htmlHeader . "
                     <h1>Neue Anfrage</h1>
@@ -225,7 +225,7 @@ function sendReservationMail($resData, $type = 'ADMIN_NOTIFICATION')
                     </div>
                     " . ($resData['comment'] ? "<p style='font-size:12px; margin-top: 20px; border-left: 2px solid $brandGold; padding-left: 10px;'><b>Bemerkung:</b><br>{$resData['comment']}</p>" : "") . "
                     <div style='text-align:center; margin-top: 30px;'>
-                        <a href='$baseUrl/admin' class='btn'>Zum Admin-Panel</a>
+                        <a href='$baseUrl/res' class='btn'>Zum Admin-Panel</a>
                     </div>
                 " . $htmlFooter;
                 break;
